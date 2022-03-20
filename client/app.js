@@ -1,6 +1,6 @@
 const mainElement = document.querySelector('main');
 
-const fetchProduits = async (param) => {
+const fetchProduits = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
     .then((res) => res.json())
     .then((json) => json)
@@ -11,7 +11,7 @@ const fetchProduits = async (param) => {
 const produitsTemplate = async () => {
   const produitsDispo = await fetchProduits('getAvailableProducts').produitsDispos;
   if (produitsDispo && produitsDispo.length) {
-    const produitsMap = produproduitsDispoits.map((produit) => {
+    const produitsMap = produitsDispo.map((produit) => {
       const article = document.createElement('article');
       article.innerHTML = `
         <p>Id : ${produit.id_produit}</p>
