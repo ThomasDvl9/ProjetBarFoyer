@@ -1,39 +1,51 @@
 <?php
 
-include('./Route.php');
-include('/home/profsir/yanngouville/public_html/MiniProjetFoyer/API_Foyer.php');
-header('Access-Control-Allow-Origin: *');
+include "./Route.php";
+include "/home/profsir/yanngouville/public_html/MiniProjetFoyer/API_Foyer.php";
+header("Access-Control-Allow-Origin: *");
 
-$user="groupe6";
-$mdp="Password1234g6";
-$host="localhost";
-$base="foyerbdd_g6";
-$api=new API_Foyer($user,$mdp,$host,$base);
+$user = "groupe6";
+$mdp = "Password1234g6";
+$host = "localhost";
+$base = "foyerbdd_g6";
+$api = new API_Foyer($user, $mdp, $host, $base);
 
+// ensemble des methodes GET
 
-// ensemble des methodes GET 
+Route::add(
+    "/",
+    function () {
+        echo "welcome ";
+    },
+    "get"
+);
 
-Route::add('/',function(){
-    echo "welcome ";
-},'get');
+Route::add(
+    "/getAvailableProducts",
+    function () {
+        global $api;
+        echo $api->getAvailableProducts();
+    },
+    "get"
+);
 
+Route::add(
+    "/getPendingOrders",
+    function () {
+        global $api;
+        echo $api->getPendingOrders();
+    },
+    "get"
+);
 
-Route::add('/getAvailableProducts',function(){
-    global $api;
-    echo $api->getAvailableProducts();
-},'get');
-
-
-Route::add('/getPendingOrders',function(){
-    global $api;
-    echo $api->getPendingOrders();
-},'get');
-
- 
-Route::add('/validateOrder',function(){
-    global $api;
-    echo $api->validateOrder();
-},'get');
+Route::add(
+    "/validateOrder",
+    function () {
+        global $api;
+        echo $api->validateOrder();
+    },
+    "get"
+);
 
 /*
 Route::add('/isAlreadyPreordered',function(){
@@ -44,11 +56,15 @@ Route::add('/isAlreadyPreordered',function(){
 // ensemble des méthodes POST
 */
 
-Route::add('/authentication',function(){
-    global $api;  
-    header('Content-Type:application/json');
-    echo $api->authentication();
-},'post');
+Route::add(
+    "/authentication",
+    function () {
+        global $api;
+        header("Content-Type:application/json");
+        echo $api->authentication();
+    },
+    "post"
+);
 
 /*  
 Route::add('/order',function(){
@@ -57,10 +73,14 @@ Route::add('/order',function(){
 },'post');
 */
 
-Route::add('/preorder',function(){
-    global $api;
-    echo $api->preorder() ;
-},'post');
+Route::add(
+    "/preorder",
+    function () {
+        global $api;
+        echo $api->preorder();
+    },
+    "post"
+);
 
 /*
 // ensemble des methodes PUT
@@ -74,14 +94,14 @@ Route::add('/orderReady',function(){
 
 //gestion des messages d'erreur
 
-Route::pathNotFound(function(){
+Route::pathNotFound(function () {
     echo "Ce chemin n'existe pas";
 });
 
-Route::methodNotAllowed(function() {
+Route::methodNotAllowed(function () {
     echo "Cette méthode n'existe pas";
 });
 
-Route::run('/~paulhelleu/MiniProjet/index.php');
+Route::run("/~paulhelleu/MiniProjet/index.php");
 
 ?>
