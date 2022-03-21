@@ -64,6 +64,7 @@ header {
       }
     }
     .list {
+      flex-grow: 1;
       margin: 1.5rem;
       display: flex;
       flex-direction: column;

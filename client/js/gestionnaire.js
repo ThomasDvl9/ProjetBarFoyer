@@ -14,21 +14,11 @@ const produitsTemplate = async () => {
     const produitsMap = produitsDispo.produitsDispos.map((produit) => {
       const article = document.createElement('article');
       article.innerHTML = `
-        <div class="input-group">
-          <label>Nom :</label>
-          <input type="text" value="${produit.denomination}" />
-        </div>
-
-        <div class="input-group">
-          <label>Prix :</label>
-          <input type="number" value="${produit.prix}" />
-        </div>
-
-        <div class="input-group">
-          <label>Quantite :</label>
-          <input type="number" value="${produit.qt_dispo}" />
-        </div>
+        <p>Nom: ${produit.denomination}</p>
+        <p>Prix: ${produit.denomination}</p>
+        <p>Quantite: ${produit.qt_dispo}</p>
       `;
+      article.addEventListener('click', (e) => {});
       return article;
     });
     sectionElement.append(...produitsMap);

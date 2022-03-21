@@ -18,3 +18,17 @@ a {
 ul {
   list-style: none;
 }
+
+.form-group {
+  margin-bottom: 4rem;
+  display: flex;
+  flex-direction: column;
+  input {
+    padding: 1rem;
+  }
+}
+
+.btn-container {
+  display: flex;
+  justify-content: center;
+}
