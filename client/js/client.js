@@ -1,4 +1,12 @@
-const mainElement = document.querySelector('main');
+const sectionElement = document.querySelector('section');
+const h3 = document.querySelector('h3');
+const url = new URL(location);
+
+const param = url.search.split('=');
+
+if (param[0] === '?table') {
+  h3.innerHTML = 'Table ' + param[1];
+}
 
 const fetchProduits = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
@@ -16,11 +24,14 @@ const produitsTemplate = async () => {
       article.innerHTML = `
         <p>Nom : ${produit.denomination}</p>
         <p>Prix : ${produit.prix}</p>
-        <p>Quantite : ${produit.qt_dispo}</p>
+        <div class="input-group">
+          <label>Quantite :</label>
+          <input type="number" value="0" min="0" max="${produit.qt_dispo}" />
+        </div>
       `;
       return article;
     });
-    mainElement.append(...produitsMap);
+    sectionElement.append(...produitsMap);
   } else {
     return null;
   }

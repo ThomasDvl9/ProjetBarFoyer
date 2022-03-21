@@ -1,4 +1,4 @@
-const mainElement = document.querySelector('main');
+const sectionElement = document.querySelector('section');
 
 const fetchProduits = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
@@ -14,13 +14,24 @@ const produitsTemplate = async () => {
     const produitsMap = produitsDispo.produitsDispos.map((produit) => {
       const article = document.createElement('article');
       article.innerHTML = `
-        <p>Nom : ${produit.denomination}</p>
-        <p>Prix : ${produit.prix}</p>
-        <p>Quantite : ${produit.qt_dispo}</p>
+        <div class="input-group">
+          <label>Nom :</label>
+          <input type="text" value="${produit.denomination}" />
+        </div>
+
+        <div class="input-group">
+          <label>Prix :</label>
+          <input type="number" value="${produit.prix}" />
+        </div>
+
+        <div class="input-group">
+          <label>Quantite :</label>
+          <input type="number" value="${produit.qt_dispo}" />
+        </div>
       `;
       return article;
     });
-    mainElement.append(...produitsMap);
+    sectionElement.append(...produitsMap);
   } else {
     return null;
   }

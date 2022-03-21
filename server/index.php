@@ -47,6 +47,14 @@ Route::add(
     "get"
 );
 
+Route::add(
+    "/getTables", 
+    function() {
+
+    },
+    "get"
+);
+
 /*
 Route::add('/isAlreadyPreordered',function(){
     global $api;

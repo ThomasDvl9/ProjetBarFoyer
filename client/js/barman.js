@@ -1,4 +1,4 @@
-const mainElement = document.querySelector('main');
+const sectionElement = document.querySelector('section');
 
 const fetchCommandes = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
@@ -27,8 +27,8 @@ const produitsTemplate = async () => {
       article.appendChild(produits);
       return article;
     });
-    mainElement.innerHTML = '';
-    mainElement.append(...commandesMap);
+    sectionElement.innerHTML = '';
+    sectionElement.append(...commandesMap);
   } else {
     return null;
   }
