@@ -1,4 +1,10 @@
 const sectionElement = document.querySelector('section');
+const url = new URL(location);
+
+if (url.searchParams.get('id')) {
+  console.log(url.searchParams.get('id'));
+  const produit = await fetch("")
+}
 
 const fetchProduits = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)

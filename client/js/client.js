@@ -2,10 +2,8 @@ const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
 const url = new URL(location);
 
-const param = url.search.split('=');
-
-if (param[0] === '?table') {
-  h3.innerHTML = 'Table ' + param[1];
+if (url.searchParams.get('table')) {
+  h3.innerHTML = 'Vous êtes à la table ' + url.searchParams.get('table');
 }
 
 const fetchProduits = (param) => {
@@ -18,7 +16,7 @@ const fetchProduits = (param) => {
 
 const produitsTemplate = async () => {
   const produitsDispo = await fetchProduits('getAvailableProducts');
-  if (produitsDispo != null && produitsDispo) {
+  if (produitsDispo && produitsDispo != null) {
     const produitsMap = produitsDispo.produitsDispos.map((produit) => {
       const article = document.createElement('article');
       article.innerHTML = `
