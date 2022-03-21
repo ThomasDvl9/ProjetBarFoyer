@@ -10,11 +10,10 @@ const fetchProduits = (param) => {
 
 const produitsTemplate = async () => {
   const produitsDispo = await fetchProduits('getAvailableProducts');
-  if (produitsDispo != null && produitsDispo.length) {
+  if (produitsDispo != null && produitsDispo) {
     const produitsMap = produitsDispo.produitsDispos.map((produit) => {
       const article = document.createElement('article');
       article.innerHTML = `
-        <p>Id : ${produit.id_produit}</p>
         <p>Nom : ${produit.denomination}</p>
         <p>Prix : ${produit.prix}</p>
         <p>Quantite : ${produit.qt_dispo}</p>
