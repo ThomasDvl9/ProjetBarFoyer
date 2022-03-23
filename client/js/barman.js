@@ -29,6 +29,13 @@ const produitsTemplate = async () => {
     });
     sectionElement.innerHTML = '';
     sectionElement.append(...commandesMap);
+
+    const inputElement = document.querySelectorAll('input');
+    inputElement.forEach((input) => {
+      input.addEventListener('change', (e) => {
+        console.log('Input change');
+      });
+    });
   } else {
     return null;
   }

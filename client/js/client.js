@@ -16,6 +16,7 @@ const fetchProduits = (param) => {
 
 const produitsTemplate = async () => {
   const produitsDispo = await fetchProduits('getAvailableProducts');
+
   if (produitsDispo && produitsDispo != null) {
     const produitsMap = produitsDispo.produitsDispos.map((produit) => {
       const article = document.createElement('article');

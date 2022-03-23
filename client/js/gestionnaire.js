@@ -1,10 +1,9 @@
 const sectionElement = document.querySelector('section');
-const url = new URL(location);
+// const url = new URL(location);
 
-if (url.searchParams.get('id')) {
-  console.log(url.searchParams.get('id'));
-  const produit = await fetch("")
-}
+// if (url.searchParams.get('id')) {
+//   console.log(url.searchParams.get('id'));
+// }
 
 const fetchProduits = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
@@ -20,9 +19,18 @@ const produitsTemplate = async () => {
     const produitsMap = produitsDispo.produitsDispos.map((produit) => {
       const article = document.createElement('article');
       article.innerHTML = `
-        <p>Nom: ${produit.denomination}</p>
-        <p>Prix: ${produit.denomination}</p>
-        <p>Quantite: ${produit.qt_dispo}</p>
+        <div class="input-group">
+          <label>Nom :</label>
+          <input type="text" value="${produit.denomination}" />
+        </div>
+        <div class="input-group">
+          <label>Prix :</label>
+          <input type="number" value="${produit.prix}" />
+        </div>
+        <div class="input-group">
+          <label>Quantite :</label>
+          <input type="number" value="${produit.qt_dispo}" />
+        </div>
       `;
       article.addEventListener('click', (e) => {});
       return article;
