@@ -14,8 +14,8 @@ const produitsTemplate = async () => {
     const commandesMap = commandesDispo.cmdEnCours.map((commande) => {
       const article = document.createElement('article');
       article.innerHTML = `
-        <p>ID Commande : ${commande.idCommande}</p>
-        <p>ID table : ${commande.numTable}</p>
+        <p>ID Commande : ${commande.id_commande}</p>
+        <p>ID table : ${commande.id_table}</p>
         <p>Produits :</p>
       `;
       const produits = document.createElement('div');
