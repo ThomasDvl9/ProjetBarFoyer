@@ -17,10 +17,11 @@ const fetchProduits = (param) => {
 const produitsTemplate = async () => {
   const produitsDispo = await fetchProduits('getAvailableProducts');
 
-  if (produitsDispo && produitsDispo != null) {
+  if (produitsDispo != null && Number(produitsDispo.produitsDispo) != 0) {
     const produitsMap = produitsDispo.produitsDispos.map((produit) => {
       const article = document.createElement('article');
-      article.innerHTML = `
+      if (produit.qt_dispo != 0) {
+        article.innerHTML = `
         <p>Nom : ${produit.denomination}</p>
         <p>Prix : ${produit.prix}</p>
         <div class="input-group">
@@ -28,7 +29,8 @@ const produitsTemplate = async () => {
           <input type="number" value="0" min="0" max="${produit.qt_dispo}" />
         </div>
       `;
-      return article;
+        return article;
+      }
     });
     sectionElement.append(...produitsMap);
   } else {

@@ -10,7 +10,7 @@ const fetchCommandes = (param) => {
 
 const produitsTemplate = async () => {
   const commandesDispo = await fetchCommandes('getPendingOrders');
-  if (commandesDispo != null && commandesDispo) {
+  if (commandesDispo != null && commandesDispo.cmdEnCours != 0) {
     const commandesMap = commandesDispo.cmdEnCours.map((commande) => {
       const article = document.createElement('article');
       article.innerHTML = `

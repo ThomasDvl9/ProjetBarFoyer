@@ -49,12 +49,77 @@ Route::add(
 // );
 
 // Route::add(
-//     "/getTables", 
+//     "/hasAccessLevel",
 //     function() {
-
+//         global $api;
+//         echo $api->hasAccessLevel();
 //     },
 //     "get"
 // );
+
+Route::add(
+    "/getTables", 
+    function() {
+        global $api;
+        echo $api->getTables();
+    },
+    "get"
+);
+
+Route::add(
+    "/addTable",
+    function() {
+        global $api;
+        if (isset($_GET['table'])) {
+            // check accessLevel = 0
+            $table = $_GET['table'];
+            echo $api->addTable($table);
+        } else {
+            echo null;
+        }
+    },
+    "post"
+);
+
+Route::add(
+    "/updateTable",
+    function() {
+        global $api;
+        if (isset($_GET['table'])) {
+            // check accessLevel = 0
+            $table = $_GET['table'];
+            echo $api->addTable($table);
+        } else {
+            echo null;
+        }
+    },
+    "post"
+);
+
+Route::add(
+    "/deleteTable",
+    function() {
+        global $api;
+        if (isset($_GET['table'])) {
+            // check accessLevel = 0
+            $table = $_GET['table'];
+            echo $api->addTable($table);
+        } else {
+            echo null;
+        }
+    },
+    "get"
+    // "delete" ou "get"
+);
+
+Route::add(
+    "/addCommande",
+    function() {
+        global $api;
+        echo $api->addCommande();
+    },
+    "post"
+);
 
 /*
 Route::add('/isAlreadyPreordered',function(){
