@@ -24,7 +24,7 @@ const fetchTables = (param) => {
 
 const addElement = (nom) => {
   const element = document.createElement('article');
-  element.innerHTML = '<a class="btn btn-primary"></a>';
+  element.innerHTML = `<a class="btn btn-primary">${nom}</a>`;
   return element;
 };
 
@@ -40,60 +40,147 @@ const produitsTemplate = async () => {
   ) {
     const produitsMap = produitsDispo.produitsDispos.map((produit) => {
       const article = document.createElement('article');
-      article.innerHTML = `
+      article.setAttribute('produit-id', produit.id_produit);
+      const datePeremption = produit.peremption.split('-');
+      const dateProduit = new Date(
+        datePeremption[0],
+        datePeremption[1],
+        datePeremption[2],
+      ).getTime();
+      if (Date.now() > dateProduit) {
+        article.className = 'red';
+        article.innerHTML = '<h4>Produit périmé</h4>';
+      }
+
+      article.innerHTML += `
         <div class="input-group">
           <label>Nom :</label>
-          <input type="text" value="${produit.denomination}" />
+          <input type="text" name="denomination" value="${produit.denomination}" />
         </div>
         <div class="input-group">
           <label>Prix :</label>
-          <input type="number" value="${produit.prix}" />
+          <input type="number" name="prix" value="${produit.prix}" />
         </div>
         <div class="input-group">
           <label>Quantite :</label>
-          <input type="number" value="${produit.qt_dispo}" />
+          <input type="number" name="quantite" value="${produit.qt_dispo}" />
         </div>
-        <a id-produit="${produit.id_produit}" class="btn btn-validate btn-container">
+        <div class="input-group">
+          <label>Date de péremption :</label>
+          <input type="text" name="peremption" maxlength="10" minlength="10" value="${produit.peremption}" />
+        </div>
+        <a produit-id="${produit.id_produit}" class="btn btn-validate btn-container">
           Sauvegarder
         </a>
       `;
       return article;
     });
+
     const tablesMap = tables.tables.map((table) => {
       const article = document.createElement('article');
+      article.setAttribute('table-id', table.id_table);
       article.innerHTML = `
         <div class="input-group">
           <h4>Table id: ${table.id_table}</h4>
         </div>
         <div class="input-group">
           <label>Numéro :</label>
-          <input type="number" value="${table.numero}" />
+          <input type="number" name="numero" value="${table.numero}" />
         </div>
         <div class="input-group">
           <label>Lien QR-code :</label>
-          <input type="text" value="${table.lien_QRcode}" />
+          <input type="text" name="qr-code" value="${table.lien_QRcode}" />
         </div>
-        <a id-table="${table.id_table}" class="btn btn-validate btn-container">
+        <a table-id="${table.id_table}" class="btn btn-validate btn-container">
           Sauvegarder
         </a>
       `;
       return article;
     });
+
     sectionProduitElement.append(...produitsMap);
     sectionTableElement.append(...tablesMap);
 
-    const validateBtnProduit = document.querySelectorAll('a[id-produit]');
-    const validateBtnTable = document.querySelectorAll('a[id-table]');
+    const addProduitElement = document.createElement('article');
+    const btnAddElement = document.createElement('a');
+    btnAddElement.classList = 'btn btn-primary btn-container';
+    btnAddElement.innerText = 'Ajouter un produit';
+
+    btnAddElement.addEventListener('click', () => {
+      addProduitElement.innerHTML = `<div class="input-group">
+        <label>Nom :</label>
+        <input type="text" name="denomination" value="" />
+        </div>
+        <div class="input-group">
+          <label>Prix :</label>
+          <input type="number" name="prix" value="" />
+        </div>
+        <div class="input-group">
+          <label>Quantite :</label>
+          <input type="number" name="quantite" value="" />
+        </div>
+        <div class="input-group">
+          <label>Date de péremption :</label>
+          <input type="text" name="peremption" maxlength="10" minlength="10" value="" />
+        </div>
+        <a class="btn btn-validate btn-container">
+          Enregistrer
+        </a>`;
+    });
+
+    addProduitElement.appendChild(btnAddElement);
+    sectionProduitElement.appendChild(addProduitElement);
+
+    const validateBtnProduit = document.querySelectorAll('article[produit-id] > a');
+    const validateBtnTable = document.querySelectorAll('article[table-id] > a');
 
     validateBtnProduit.forEach((btn) => {
+      const denominationInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="denomination"]`,
+      );
+      const prixInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="prix"]`,
+      );
+      const quantiteInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="quantite"]`,
+      );
+      const peremptionInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="peremption"]`,
+      );
+
       btn.addEventListener('click', (e) => {
-        alert('Produit : ' + btn.getAttribute('id-produit'));
+        alert(
+          'Id produit : ' +
+            e.target.getAttribute('produit-id') +
+            '\nDénomination : ' +
+            denominationInp.value +
+            '\nPrix : ' +
+            prixInp.value +
+            '\nQuantite : ' +
+            quantiteInp.value +
+            '\nPeremption : ' +
+            peremptionInp.value,
+        );
       });
     });
 
     validateBtnTable.forEach((btn) => {
+      const numeroInp = document.querySelector(
+        `article[table-id="${btn.getAttribute('table-id')}"] input[name="numero"]`,
+      );
+      const qrCodeInp = document.querySelector(
+        `article[table-id="${btn.getAttribute('table-id')}"] input[name="qr-code"]`,
+      );
+
       btn.addEventListener('click', (e) => {
-        alert('Table : ' + btn.getAttribute('id-table'));
+        alert(
+          'Id table : ' +
+            e.target.getAttribute('table-id') +
+            '\nNuméro : ' +
+            numeroInp.value +
+            '\nQrCode : ' +
+            qrCodeInp.value,
+        );
       });
     });
   } else {

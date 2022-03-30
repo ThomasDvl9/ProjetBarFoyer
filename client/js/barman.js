@@ -22,9 +22,10 @@ const produitsTemplate = async () => {
       commande.produit.map((produit) => {
         produits.innerHTML += `<p>Nom : ${produit.denomination} x${
           produit.quantite
-        }</p><input type="checkbox" ${produit.cochee == '0' ? '' : 'checked'} />`;
+        }</p><input type="checkbox" ${produit.confirmee == '0' ? '' : 'checked'} />`;
       });
       article.appendChild(produits);
+
       return article;
     });
     sectionElement.innerHTML = '';
@@ -32,7 +33,7 @@ const produitsTemplate = async () => {
 
     const inputElement = document.querySelectorAll('input');
     inputElement.forEach((input) => {
-      input.addEventListener('change', (e) => {
+      input.addEventListener('change', () => {
         console.log('Input change');
       });
     });

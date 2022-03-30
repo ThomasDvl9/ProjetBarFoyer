@@ -114,5 +114,17 @@ main {
       border: 0.2rem solid #333;
       border-radius: 0.3rem;
     }
+    .red {
+      background-color: #e74c3c;
+      a {
+        background-color: #c0392b;
+        border: 1px solid #c0392b;
+        color: #fff;
+        &:hover {
+          background-color: #e74c3c;
+          box-shadow: 0 0 0;
+        }
+      }
+    }
   }
 }
