@@ -59,11 +59,11 @@ const produitsTemplate = async () => {
         </div>
         <div class="input-group">
           <label>Prix :</label>
-          <input type="number" name="prix" value="${produit.prix}" />
+          <input type="number" min="0.1" step="0.05" name="prix" value="${produit.prix}" />
         </div>
         <div class="input-group">
           <label>Quantite :</label>
-          <input type="number" name="quantite" value="${produit.qt_dispo}" />
+          <input type="number" min="0" name="quantite" value="${produit.qt_dispo}" />
         </div>
         <div class="input-group">
           <label>Date de péremption :</label>
@@ -113,7 +113,7 @@ const produitsTemplate = async () => {
         </div>
         <div class="input-group">
           <label>Prix :</label>
-          <input type="number" name="prix" value="" />
+          <input type="number" min="0.1" step="0.05" name="prix" value="" />
         </div>
         <div class="input-group">
           <label>Quantite :</label>

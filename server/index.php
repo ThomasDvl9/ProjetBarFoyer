@@ -31,10 +31,49 @@ Route::add(
 );
 
 Route::add(
+    "/getProductById",
+    function () {
+        global $api;
+        $id = $_GET["id"];
+        echo $api->getProductById($id);
+    },
+    "get"
+);
+
+
+Route::add(
     "/getPendingOrders",
     function () {
         global $api;
         echo $api->getPendingOrders();
+    },
+    "get"
+);
+
+Route::add(
+    "/getCommandsDetails",
+    function() {
+        global $api;
+        echo $api->getCommandsDetails();
+    },
+    "get"
+);
+
+Route::add(
+    "/getCommandDetailById",
+    function() {
+        global $api;
+        echo $api->getCommandDetailById($_GET["id"]);
+    },
+    "get"
+);
+
+Route::add(
+    "/getCommandById",
+    function () {
+        global $api;
+        $id = $_GET["id"];
+        echo $api->getProductById($id);
     },
     "get"
 );

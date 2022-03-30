@@ -10,24 +10,48 @@ const fetchCommandes = (param) => {
 
 const produitsTemplate = async () => {
   const commandesDispo = await fetchCommandes('getPendingOrders');
-  if (commandesDispo != null && commandesDispo.cmdEnCours != 0) {
-    const commandesMap = commandesDispo.cmdEnCours.map((commande) => {
+  if (commandesDispo != null && commandesDispo != 0) {
+    const commandesMap = commandesDispo.map(async (commande) => {
       const article = document.createElement('article');
       article.innerHTML = `
         <p>ID Commande : ${commande.id_commande}</p>
         <p>ID table : ${commande.id_table}</p>
         <p>Produits :</p>
       `;
-      const produits = document.createElement('div');
-      commande.produit.map((produit) => {
-        produits.innerHTML += `<p>Nom : ${produit.denomination} x${
-          produit.quantite
-        }</p><input type="checkbox" ${produit.confirmee == '0' ? '' : 'checked'} />`;
-      });
-      article.appendChild(produits);
+      const detailsCommande = await fetchCommandes(
+        'getCommandDetailById?id=' + commande.id_commande,
+      );
+      const detailsElement = document.createElement('div');
 
+      detailsElement.innerHTML = `
+        
+      `;
+      article.appendChild(detailsElement);
       return article;
+      // const produits = document.createElement('div');
+      // commande.produit.map((produit) => {
+      //   produits.innerHTML += `<p>Nom : ${produit.denomination} x${
+      //     produit.quantite
+      //   }</p><input type="checkbox" ${produit.confirmee == '0' ? '' : 'checked'} />`;
+      // });
     });
+    // const commandesMap = commandesDispo.cmdEnCours.map((commande) => {
+    //   const article = document.createElement('article');
+    //   article.innerHTML = `
+    //     <p>ID Commande : ${commande.id_commande}</p>
+    //     <p>ID table : ${commande.id_table}</p>
+    //     <p>Produits :</p>
+    //   `;
+    //   const produits = document.createElement('div');
+    //   commande.produit.map((produit) => {
+    //     produits.innerHTML += `<p>Nom : ${produit.denomination} x${
+    //       produit.quantite
+    //     }</p><input type="checkbox" ${produit.confirmee == '0' ? '' : 'checked'} />`;
+    //   });
+    //   article.appendChild(produits);
+
+    //   return article;
+    // });
     sectionElement.innerHTML = '';
     sectionElement.append(...commandesMap);
 

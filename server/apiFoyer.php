@@ -20,6 +20,34 @@
   
       if($result) {
         $json["produitsDispos"] = $result;
+      } else { 
+        $json["produitsDispos"] = 0;
+      }
+  
+      return json_encode($json, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function getProductById($id) {
+      $objPDOStatement = $this->PDO->query("SELECT * FROM produits WHERE id_produit = $id");
+  
+      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+  
+      if($result) {
+        $json["produit"] = $result;
+      } else { 
+        $json["produit"] = 0;
+      }
+  
+      return json_encode($json, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function updateProduct() {
+      $objPDOStatement = $this->PDO->query("UPDATE * FROM produits");
+  
+      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+  
+      if($result) {
+        $json["produitsDispos"] = $result;
       } else {
         $json["produitsDispos"] = 0;
       }
@@ -33,9 +61,37 @@
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
   
       if($result) {
-        $json["cmdEnCours"] = $result;
+        $json = $result;
       } else {
-        $json["cmdEnCours"] = 0;
+        $json = 0;
+      }
+  
+      return json_encode($json, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function getCommandsDetails() {
+      $objPDOStatement = $this->PDO->query("SELECT * FROM detail_commandes");
+  
+      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+  
+      if($result) {
+        $json = $result;        
+      } else {
+        $json = 0;
+      }
+  
+      return json_encode($json, JSON_UNESCAPED_UNICODE);
+    }
+
+    public function getCommandDetailById($id) {
+      $objPDOStatement = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $id");
+  
+      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+  
+      if($result) {
+        $json = $result;        
+      } else {
+        $json = 0;
       }
   
       return json_encode($json, JSON_UNESCAPED_UNICODE);
@@ -56,7 +112,7 @@
     }
 
     public function addTable() {
-      $objPDOStatement = $this->PDO->query("INSERT INTO tables (table_id, numero, lien_QRcode) VALUES (15, 15, 'lien du QRcode')");
+      $objPDOStatement = $this->PDO->query("INSERT INTO tables (numero, lien_QRcode) VALUES (15, 'lien du QRcode')");
 
       return $objPDOStatement;
     } 
