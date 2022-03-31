@@ -18,8 +18,8 @@ const produitsTemplate = async () => {
   const produitsDispo = await fetchProduits('getAvailableProducts');
 
   if (produitsDispo != null && Number(produitsDispo.produitsDispo) != 0) {
-    const produitsMap = produitsDispo.produitsDispos
-      .map((produit) => {
+    const produitsMap = produitsDispo
+      .filter((produit) => {
         const datePeremption = produit.peremption.split('-');
         const dateProduit = new Date(
           datePeremption[0],
@@ -27,10 +27,12 @@ const produitsTemplate = async () => {
           datePeremption[2],
         ).getTime();
 
-        if (Date.now() < dateProduit) {
-          const article = document.createElement('article');
-          if (produit.qt_dispo != 0) {
-            article.innerHTML = `
+        return Date.now() < dateProduit;
+      })
+      .map((produit) => {
+        const article = document.createElement('article');
+        if (produit.qt_dispo != 0) {
+          article.innerHTML = `
               <p>Nom : ${produit.denomination}</p>
               <p>Prix : ${produit.prix}</p>
               <div class="input-group">
@@ -38,13 +40,9 @@ const produitsTemplate = async () => {
                 <input type="number" name="quantite" value="0" min="0" max="${produit.qt_dispo}" />
               </div>
             `;
-            return article;
-          }
-        } else {
-          return undefined;
+          return article;
         }
-      })
-      .filter((elem) => elem != undefined);
+      });
 
     sectionElement.append(...produitsMap);
 

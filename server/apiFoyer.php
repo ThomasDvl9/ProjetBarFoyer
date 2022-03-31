@@ -13,15 +13,19 @@
       }
     }
 
+    
+    // setcookie("nom", "contenu");
+    // session_start();
+
     public function getAvailableProducts() {
       $objPDOStatement = $this->PDO->query("SELECT * FROM produits");
   
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
   
       if($result) {
-        $json["produitsDispos"] = $result;
+        $json = $result;
       } else { 
-        $json["produitsDispos"] = 0;
+        $json = 0;
       }
   
       return json_encode($json, JSON_UNESCAPED_UNICODE);
@@ -33,9 +37,9 @@
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
   
       if($result) {
-        $json["produit"] = $result;
+        $json = $result;
       } else { 
-        $json["produit"] = 0;
+        $json = 0;
       }
   
       return json_encode($json, JSON_UNESCAPED_UNICODE);
@@ -138,6 +142,8 @@
     }    
 
     public function addCommande() {
+      // comment recupérer body requete
+
       $header = $_POST;
 
       echo $header;
@@ -147,5 +153,6 @@
       return $objPDOStatement;
     }
 }
+
 
 ?>

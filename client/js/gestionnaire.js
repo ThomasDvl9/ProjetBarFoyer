@@ -6,15 +6,7 @@ const sectionTableElement = document.getElementById('tables');
 //   console.log(url.searchParams.get('id'));
 // }
 
-const fetchProduits = (param) => {
-  const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
-    .then((res) => res.json())
-    .then((json) => json)
-    .catch(() => null);
-  return produits;
-};
-
-const fetchTables = (param) => {
+const fetchApi = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
     .then((res) => res.json())
     .then((json) => json)
@@ -29,8 +21,8 @@ const addElement = (nom) => {
 };
 
 const produitsTemplate = async () => {
-  const produitsDispo = await fetchProduits('getAvailableProducts');
-  const tables = await fetchProduits('getTables');
+  const produitsDispo = await fetchApi('getAvailableProducts');
+  const tables = await fetchApi('getTables');
 
   if (
     produitsDispo != null &&
@@ -38,7 +30,7 @@ const produitsTemplate = async () => {
     tables != null &&
     Number(tables.tables) != 0
   ) {
-    const produitsMap = produitsDispo.produitsDispos.map((produit) => {
+    const produitsMap = produitsDispo.map((produit) => {
       const article = document.createElement('article');
       article.setAttribute('produit-id', produit.id_produit);
       const datePeremption = produit.peremption.split('-');
@@ -149,6 +141,7 @@ const produitsTemplate = async () => {
       );
 
       btn.addEventListener('click', (e) => {
+        const body = {};
         alert(
           'Id produit : ' +
             e.target.getAttribute('produit-id') +
@@ -161,6 +154,13 @@ const produitsTemplate = async () => {
             '\nPeremption : ' +
             peremptionInp.value,
         );
+        fetch('url', {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
       });
     });
 
