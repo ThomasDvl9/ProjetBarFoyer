@@ -143,14 +143,42 @@
 
     public function addCommande() {
       // comment recupérer body requete
+      // email
+      // id_table dans url
+      // confirmee = 0
+      // preparee = 0
+      // dateCommande = date actuel
+
+      $date = date_create();
+
+      date_timezone_get($date);
 
       $header = $_POST;
 
       echo $header;
 
-      $objPDOStatement = $this->PDO->query("INSERT INTO commande (id_table, email, confirmee, preparee, dateCommande) VALUES ('', '', '', '', '')");
+      $objPDOStatement = $this->PDO->query("INSERT INTO commande (id_table, email, confirmee, preparee, dateCommande) VALUES ('', '', '0', '0', '')");
 
       return $objPDOStatement;
+    }
+
+    // authentification
+
+    public function getUser() {
+      // récuperer body de la requête
+      $objPDOStatement = $this->PDO->query("SELECT * FROM users");
+
+      // $mdp = md5("Password1234");
+  
+      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+  
+      if($result) {
+        $json = $result;
+      } else {
+        $json = 0;
+      }
+  
+      return json_encode($json, JSON_UNESCAPED_UNICODE);
     }
 }
 

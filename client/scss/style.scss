@@ -126,5 +126,14 @@ main {
         }
       }
     }
+    .delete-icon {
+      width: 100%;
+      height: 2rem;
+      i {
+        height: 2rem;
+        width: 2rem;
+        font-size: 2rem;
+      }
+    }
   }
 }

@@ -1,3 +1,5 @@
+// import fetchApi from './fetchApi';
+
 const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
 const url = new URL(location);
@@ -6,7 +8,7 @@ if (url.searchParams.get('table')) {
   h3.innerHTML = 'Vous êtes à la table ' + url.searchParams.get('table');
 }
 
-const fetchProduits = (param) => {
+const fetchApi = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
     .then((res) => res.json())
     .then((json) => json)
@@ -15,7 +17,7 @@ const fetchProduits = (param) => {
 };
 
 const produitsTemplate = async () => {
-  const produitsDispo = await fetchProduits('getAvailableProducts');
+  const produitsDispo = await fetchApi('getAvailableProducts');
 
   if (produitsDispo != null && Number(produitsDispo.produitsDispo) != 0) {
     const produitsMap = produitsDispo
@@ -48,9 +50,18 @@ const produitsTemplate = async () => {
 
     const btnSubmit = document.querySelector('a[type="button"]');
     const quantiteInp = document.querySelectorAll('input[name="quantite"]');
-    btnSubmit.addEventListener('click', () => {
+    btnSubmit.addEventListener('click', async () => {
       quantiteInp.forEach((inp, index) => {
-        console.log('Index ' + index + ' : ' + inp.value);
+        if (Number(inp.value) > 0) {
+          console.log('Index ' + index + ' : ' + inp.value);
+        }
+        // await fetch('url', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify(inp.value),
+        // });
       });
     });
   } else {

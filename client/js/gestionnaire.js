@@ -33,6 +33,7 @@ const produitsTemplate = async () => {
     const produitsMap = produitsDispo.map((produit) => {
       const article = document.createElement('article');
       article.setAttribute('produit-id', produit.id_produit);
+
       const datePeremption = produit.peremption.split('-');
       const dateProduit = new Date(
         datePeremption[0],
@@ -42,8 +43,10 @@ const produitsTemplate = async () => {
       if (Date.now() > dateProduit) {
         article.className = 'red';
         article.innerHTML = '<h4>Produit périmé</h4>';
+      } else {
+        article.className = 'style a faire';
+        article.innerHTML = '<h4></h4>';
       }
-
       article.innerHTML += `
         <div class="input-group">
           <label>Nom :</label>
@@ -99,7 +102,8 @@ const produitsTemplate = async () => {
     btnAddElement.innerText = 'Ajouter un produit';
 
     btnAddElement.addEventListener('click', () => {
-      addProduitElement.innerHTML = `<div class="input-group">
+      addProduitElement.innerHTML = `
+      <div class="input-group">
         <label>Nom :</label>
         <input type="text" name="denomination" value="" />
         </div>
@@ -141,26 +145,37 @@ const produitsTemplate = async () => {
       );
 
       btn.addEventListener('click', (e) => {
-        const body = {};
-        alert(
-          'Id produit : ' +
-            e.target.getAttribute('produit-id') +
-            '\nDénomination : ' +
-            denominationInp.value +
-            '\nPrix : ' +
-            prixInp.value +
-            '\nQuantite : ' +
-            quantiteInp.value +
-            '\nPeremption : ' +
-            peremptionInp.value,
-        );
-        fetch('url', {
-          method: 'POST',
-          body: JSON.stringify(body),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        const datePeremption = peremptionInp.value.split('-');
+        const dateProduit = new Date(
+          datePeremption[0],
+          datePeremption[1],
+          datePeremption[2],
+        ).getTime();
+        if (Date.now() < dateProduit) {
+          const body = {};
+          alert(
+            'Id produit : ' +
+              e.target.getAttribute('produit-id') +
+              '\nDénomination : ' +
+              denominationInp.value +
+              '\nPrix : ' +
+              prixInp.value +
+              '\nQuantite : ' +
+              quantiteInp.value +
+              '\nPeremption : ' +
+              peremptionInp.value,
+          );
+
+          // fetch('url', {
+          //   method: 'POST',
+          //   body: JSON.stringify(body),
+          //   headers: {
+          //     'Content-Type': 'application/json',
+          //   },
+          // });
+        } else {
+          alert('Date de péremption non valide !');
+        }
       });
     });
 
