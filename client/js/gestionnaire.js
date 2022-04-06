@@ -49,7 +49,7 @@ const produitsTemplate = async () => {
         </div>
         <div class="input-group">
           <label>Date de péremption :</label>
-          <input type="text" name="peremption" maxlength="10" minlength="10" value="${produit.peremption}" />
+          <input type="date" name="peremption" maxlength="10" minlength="10" value="${produit.peremption}" />
         </div>
         <a produit-id="${produit.id_produit}" class="btn btn-validate btn-container">
           Sauvegarder
@@ -200,7 +200,7 @@ const ajouterProduitElement = () => {
       </div>
       <div class="input-group">
         <label>Prix :</label>
-        <input type="number" min="0.1" step="0.05" name="prix" value="" />
+        <input type="number" min="0.1" step="0.05" name="prix" />
       </div>
       <div class="input-group">
         <label>Quantite :</label>
@@ -208,11 +208,30 @@ const ajouterProduitElement = () => {
       </div>
       <div class="input-group">
         <label>Date de péremption :</label>
-        <input type="text" name="peremption" maxlength="10" minlength="10" value="" />
-      </div>
-      <a class="btn btn-validate btn-container">
-      Ajouter
-      </a>`;
+        <input type="date" name="peremption" maxlength="10" minlength="10" />
+      </div>`;
+
+    const btn = document.createElement('a');
+    btn.className = 'btn btn-validate btn-container';
+    btn.innerText = 'Enregistrer';
+    addProduitElement.appendChild(btn);
+
+    // ajouter produit
+    btn.addEventListener('click', async (e) => {
+      // await fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/addProduct', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/x-www-form-urlencoded',
+      //   },
+      //   body: JSON.stringify({}),
+      // })
+      //   .then((res) => {
+      //     console.log(res);
+      //   })
+      //   .catch((err) => {
+      //     console.error(err);
+      //   });
+    });
   });
 
   addProduitElement.appendChild(btnAddElement);
@@ -248,7 +267,13 @@ const ajouterTableElement = () => {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: JSON.stringify({ numero: '', lien: '' }),
-      });
+      })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     });
   });
 

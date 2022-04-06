@@ -40,6 +40,17 @@ Route::add(
     "get"
 );
 
+Route::add(
+    "/addProduct",
+    function () {
+        global $api;
+        $api->addProduct();
+        http_response_code(200);
+    },
+    "get"
+);
+
+
 
 Route::add(
     "/getPendingOrders",

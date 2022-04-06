@@ -38,7 +38,7 @@ const produitsTemplate = async () => {
         article.innerHTML = `
           <div>
             <p>Nom : ${produit.denomination}</p>
-            <p>Prix : <span class="price">${produit.prix}</span></p>
+            <p>Prix : <span class="price">${produit.prix}</span> €</p>
             <div class="input-group">
               <label>Quantite :</label>
               <input type="number" name="quantite" value="0" min="0" max="${produit.qt_dispo}" />

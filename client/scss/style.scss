@@ -129,6 +129,19 @@ main {
       display: flex;
       div {
         flex: 1;
+        img {
+          height: 8rem;
+          width: 8rem;
+          @include medium {
+            height: 11.5rem;
+            width: 11.5rem;
+          }
+        }
+      }
+      div:nth-child(2) {
+        display: flex;
+        align-items: center;
+        justify-content: right;
       }
     }
     .red {
@@ -152,5 +165,11 @@ main {
         font-size: 2rem;
       }
     }
+  }
+  .validate-cmd {
+    min-width: 20rem;
+    max-width: 50rem;
+    margin: 0 auto;
+    padding: 4rem;
   }
 }
