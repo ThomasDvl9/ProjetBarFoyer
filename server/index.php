@@ -109,12 +109,10 @@ Route::add(
     "/addTable",
     function() {
         global $api;
-        if (isset($_GET['table'])) {
-            // check accessLevel = 0
-            $table = $_GET['table'];
-            echo $api->addTable($table);
+        if($api->addTable()) {
+            echo 1;
         } else {
-            echo null;
+            echo 0;
         }
     },
     "post"
@@ -142,7 +140,7 @@ Route::add(
         if (isset($_GET['table'])) {
             // check accessLevel = 0
             $table = $_GET['table'];
-            echo $api->addTable($table);
+            echo $api->deleteTable($table);
         } else {
             echo null;
         }

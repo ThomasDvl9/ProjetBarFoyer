@@ -17,11 +17,22 @@
       background-color: #2ecc71;
     }
   }
+  &-delete {
+    border: 1px solid #e74c3c;
+    &:hover {
+      color: #fff;
+      background-color: #e74c3c;
+    }
+  }
   &:hover {
     transform: scale(1.05);
     transition: transform 300ms;
     box-shadow: 0.5rem 0.7rem 2rem -1rem #eee;
   }
+}
+
+.mt-2 {
+  margin-top: 2rem;
 }
 
 input {

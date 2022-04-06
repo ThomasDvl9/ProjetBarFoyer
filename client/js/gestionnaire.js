@@ -1,10 +1,8 @@
 const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
-// const url = new URL(location);
 
-// if (url.searchParams.get('id')) {
-//   console.log(url.searchParams.get('id'));
-// }
+const produitsAjouter = [];
+const tablesAjouter = [];
 
 const fetchApi = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
@@ -28,7 +26,7 @@ const produitsTemplate = async () => {
     produitsDispo != null &&
     Number(produitsDispo.produitsDispo) != 0 &&
     tables != null &&
-    Number(tables.tables) != 0
+    Number(tables) != 0
   ) {
     const produitsMap = produitsDispo.map((produit) => {
       const article = document.createElement('article');
@@ -43,9 +41,6 @@ const produitsTemplate = async () => {
       if (Date.now() > dateProduit) {
         article.className = 'red';
         article.innerHTML = '<h4>Produit périmé</h4>';
-      } else {
-        article.className = 'style a faire';
-        article.innerHTML = '<h4></h4>';
       }
       article.innerHTML += `
         <div class="input-group">
@@ -67,11 +62,14 @@ const produitsTemplate = async () => {
         <a produit-id="${produit.id_produit}" class="btn btn-validate btn-container">
           Sauvegarder
         </a>
+        <a produit-id="${produit.id_produit}" class="btn btn-delete btn-container mt-2">
+          Supprimer
+        </a>
       `;
       return article;
     });
 
-    const tablesMap = tables.tables.map((table) => {
+    const tablesMap = tables.map((table) => {
       const article = document.createElement('article');
       article.setAttribute('table-id', table.id_table);
       article.innerHTML = `
@@ -88,6 +86,9 @@ const produitsTemplate = async () => {
         </div>
         <a table-id="${table.id_table}" class="btn btn-validate btn-container">
           Sauvegarder
+        </a>
+        <a table-id="${table.id_table}" class="btn btn-delete btn-container mt-2">
+          Supprimer
         </a>
       `;
       return article;
@@ -187,7 +188,7 @@ const produitsTemplate = async () => {
         `article[table-id="${btn.getAttribute('table-id')}"] input[name="qr-code"]`,
       );
 
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         alert(
           'Id table : ' +
             e.target.getAttribute('table-id') +
@@ -196,6 +197,8 @@ const produitsTemplate = async () => {
             '\nQrCode : ' +
             qrCodeInp.value,
         );
+        const a = await fetchApi('deleteTable?table=' + e.target.getAttribute('table-id'));
+        console.log(e.target.getAttribute('table-id'));
       });
     });
   } else {

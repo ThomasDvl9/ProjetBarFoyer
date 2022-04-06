@@ -2,6 +2,7 @@
 
 const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
+const totalElement = document.getElementById('total');
 const url = new URL(location);
 
 if (url.searchParams.get('table')) {
@@ -29,27 +30,27 @@ const produitsTemplate = async () => {
           datePeremption[2],
         ).getTime();
 
-        return Date.now() < dateProduit;
+        return Date.now() < dateProduit || Number(produit.qt_dispo);
       })
       .map((produit) => {
         const article = document.createElement('article');
-        if (produit.qt_dispo != 0) {
-          article.innerHTML = `
-              <p>Nom : ${produit.denomination}</p>
-              <p>Prix : ${produit.prix}</p>
-              <div class="input-group">
-                <label>Quantite :</label>
-                <input type="number" name="quantite" value="0" min="0" max="${produit.qt_dispo}" />
-              </div>
-            `;
-          return article;
-        }
+        article.innerHTML = `
+          <p>Nom : ${produit.denomination}</p>
+          <p>Prix : <span class="price">${produit.prix}</span></p>
+          <div class="input-group">
+            <label>Quantite :</label>
+            <input type="number" name="quantite" value="0" min="0" max="${produit.qt_dispo}" />
+          </div>
+        `;
+        return article;
       });
 
     sectionElement.append(...produitsMap);
 
     const btnSubmit = document.querySelector('a[type="button"]');
+    const prixArticle = document.querySelectorAll('article > p > .price');
     const quantiteInp = document.querySelectorAll('input[name="quantite"]');
+
     btnSubmit.addEventListener('click', async () => {
       quantiteInp.forEach((inp, index) => {
         if (Number(inp.value) > 0) {
@@ -57,11 +58,29 @@ const produitsTemplate = async () => {
         }
         // await fetch('url', {
         //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
         //   body: JSON.stringify(inp.value),
         // });
+      });
+      await fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/addTable', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: JSON.stringify({ table: 45 }),
+      });
+    });
+
+    quantiteInp.forEach((inp) => {
+      inp.addEventListener('change', () => {
+        let sum = 0;
+        quantiteInp.forEach((inp, index) => {
+          sum += Math.round(Number(inp.value) * Number(prixArticle[index].innerText) * 100) / 100;
+        });
+        if (sum < 0) {
+          alert('Valeur non valide !');
+        } else {
+          totalElement.innerText = sum;
+        }
       });
     });
   } else {

@@ -107,16 +107,20 @@
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
   
       if ($result) {
-        $json["tables"] = $result;
+        $json = $result;
       } else {
-        $json["tables"] = 0;
+        $json = 0;
       }
   
       return json_encode($json, JSON_UNESCAPED_UNICODE);
     }
 
     public function addTable() {
-      $objPDOStatement = $this->PDO->query("INSERT INTO tables (numero, lien_QRcode) VALUES (15, 'lien du QRcode')");
+      $data = json_decode(file_get_contents('php://input'));
+
+      $table = $data->table;
+
+      $objPDOStatement = $this->PDO->query("INSERT INTO tables (numero, lien_QRcode) VALUES ($table, 'null')");
 
       return $objPDOStatement;
     } 
@@ -153,11 +157,11 @@
 
       date_timezone_get($date);
 
-      $header = $_POST;
+      $data = json_decode(file_get_contents('php://input'));
 
-      echo $header;
 
-      $objPDOStatement = $this->PDO->query("INSERT INTO commande (id_table, email, confirmee, preparee, dateCommande) VALUES ('', '', '0', '0', '')");
+
+      $objPDOStatement = $this->PDO->query("INSERT INTO commande (id_table, email, confirmee, preparee, dateCommande) VALUES ('', '', '0', '0', '$date')");
 
       return $objPDOStatement;
     }
