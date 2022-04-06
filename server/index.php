@@ -140,7 +140,8 @@ Route::add(
         if (isset($_GET['table'])) {
             // check accessLevel = 0
             $table = $_GET['table'];
-            echo $api->deleteTable($table);
+            $api->deleteTable($table);
+            http_response_code(200);
         } else {
             echo null;
         }

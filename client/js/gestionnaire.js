@@ -1,21 +1,12 @@
 const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 
-const produitsAjouter = [];
-const tablesAjouter = [];
-
 const fetchApi = (param) => {
   const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
   return produits;
-};
-
-const addElement = (nom) => {
-  const element = document.createElement('article');
-  element.innerHTML = `<a class="btn btn-primary">${nom}</a>`;
-  return element;
 };
 
 const produitsTemplate = async () => {
@@ -42,6 +33,7 @@ const produitsTemplate = async () => {
         article.className = 'red';
         article.innerHTML = '<h4>Produit périmé</h4>';
       }
+
       article.innerHTML += `
         <div class="input-group">
           <label>Nom :</label>
@@ -94,42 +86,24 @@ const produitsTemplate = async () => {
       return article;
     });
 
+    sectionProduitElement.innerText = '';
+    sectionTableElement.innerText = '';
+
     sectionProduitElement.append(...produitsMap);
     sectionTableElement.append(...tablesMap);
 
-    const addProduitElement = document.createElement('article');
-    const btnAddElement = document.createElement('a');
-    btnAddElement.classList = 'btn btn-primary btn-container';
-    btnAddElement.innerText = 'Ajouter un produit';
+    // Fonction ajouter
 
-    btnAddElement.addEventListener('click', () => {
-      addProduitElement.innerHTML = `
-      <div class="input-group">
-        <label>Nom :</label>
-        <input type="text" name="denomination" value="" />
-        </div>
-        <div class="input-group">
-          <label>Prix :</label>
-          <input type="number" min="0.1" step="0.05" name="prix" value="" />
-        </div>
-        <div class="input-group">
-          <label>Quantite :</label>
-          <input type="number" name="quantite" value="" />
-        </div>
-        <div class="input-group">
-          <label>Date de péremption :</label>
-          <input type="text" name="peremption" maxlength="10" minlength="10" value="" />
-        </div>
-        <a class="btn btn-validate btn-container">
-          Enregistrer
-        </a>`;
-    });
+    sectionProduitElement.appendChild(ajouterProduitElement());
+    sectionTableElement.appendChild(ajouterTableElement());
 
-    addProduitElement.appendChild(btnAddElement);
-    sectionProduitElement.appendChild(addProduitElement);
+    // Edition produit
 
-    const validateBtnProduit = document.querySelectorAll('article[produit-id] > a');
-    const validateBtnTable = document.querySelectorAll('article[table-id] > a');
+    const validateBtnProduit = document.querySelectorAll('article[produit-id] > a.btn-validate');
+    const deleteBtnProduit = document.querySelectorAll('article[produit-id] > a.btn-delete');
+
+    const validateBtnTable = document.querySelectorAll('article[table-id] > a.btn-validate');
+    const deleteBtnTable = document.querySelectorAll('article[table-id] > a.btn-delete');
 
     validateBtnProduit.forEach((btn) => {
       const denominationInp = document.querySelector(
@@ -168,7 +142,7 @@ const produitsTemplate = async () => {
           );
 
           // fetch('url', {
-          //   method: 'POST',
+          //   method: 'UPDAT',
           //   body: JSON.stringify(body),
           //   headers: {
           //     'Content-Type': 'application/json',
@@ -197,13 +171,89 @@ const produitsTemplate = async () => {
             '\nQrCode : ' +
             qrCodeInp.value,
         );
-        const a = await fetchApi('deleteTable?table=' + e.target.getAttribute('table-id'));
-        console.log(e.target.getAttribute('table-id'));
+      });
+    });
+
+    deleteBtnTable.forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        await fetchApi('deleteTable?table=' + e.target.getAttribute('table-id'));
+
+        produitsTemplate();
       });
     });
   } else {
     return null;
   }
+};
+
+const ajouterProduitElement = () => {
+  const addProduitElement = document.createElement('article');
+  const btnAddElement = document.createElement('a');
+  btnAddElement.classList = 'btn btn-primary btn-container';
+  btnAddElement.innerText = 'Ajouter un produit';
+
+  btnAddElement.addEventListener('click', () => {
+    addProduitElement.innerHTML = `
+      <div class="input-group">
+        <label>Nom :</label>
+        <input type="text" name="denomination" value="" />
+      </div>
+      <div class="input-group">
+        <label>Prix :</label>
+        <input type="number" min="0.1" step="0.05" name="prix" value="" />
+      </div>
+      <div class="input-group">
+        <label>Quantite :</label>
+        <input type="number" name="quantite" value="" />
+      </div>
+      <div class="input-group">
+        <label>Date de péremption :</label>
+        <input type="text" name="peremption" maxlength="10" minlength="10" value="" />
+      </div>
+      <a class="btn btn-validate btn-container">
+      Ajouter
+      </a>`;
+  });
+
+  addProduitElement.appendChild(btnAddElement);
+  return addProduitElement;
+};
+
+const ajouterTableElement = () => {
+  const tableElement = document.createElement('article');
+  const btnAddElement = document.createElement('a');
+  btnAddElement.classList = 'btn btn-primary btn-container';
+  btnAddElement.innerText = 'Ajouter une table';
+
+  btnAddElement.addEventListener('click', () => {
+    tableElement.innerHTML = `
+      <div class="input-group">
+        <label>Numéro :</label>
+        <input type="number" name="numero" />
+      </div>
+      <div class="input-group">
+        <label>Lien QR-code :</label>
+        <input type="text" name="qr-code" />
+      </div>`;
+    const btn = document.createElement('a');
+    btn.className = 'btn btn-validate btn-container';
+    btn.innerText = 'Enregistrer';
+    tableElement.appendChild(btn);
+
+    // ajouter table
+    btn.addEventListener('click', async () => {
+      await fetch('url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: JSON.stringify({ numero: '', lien: '' }),
+      });
+    });
+  });
+
+  tableElement.appendChild(btnAddElement);
+  return tableElement;
 };
 
 produitsTemplate();

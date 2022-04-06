@@ -125,6 +125,12 @@ main {
       border: 0.2rem solid #333;
       border-radius: 0.3rem;
     }
+    .products {
+      display: flex;
+      div {
+        flex: 1;
+      }
+    }
     .red {
       background-color: #e74c3c;
       a {

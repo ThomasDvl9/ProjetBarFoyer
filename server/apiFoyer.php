@@ -46,17 +46,28 @@
     }
 
     public function updateProduct() {
-      $objPDOStatement = $this->PDO->query("UPDATE * FROM produits");
+      $objPDOStatement = $this->PDO->query("UPDATE produits SET denomination = '', prix = '', qt_dispo = '', peremption = ''");
   
-      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+      return $objPDOStatement;
+    }
+
+    public function addProduct() {
+      $data = json_decode(file_get_contents('php://input'));
+
+      $nom = $data->nom;
+      $prix = $data->prix;
+      $quantite = $data->quantite;
+      $peremption = $data->peremption;
+      
+      $objPDOStatement = $this->PDO->query("INSERT INTO produits (denomination, prix, qt_dispo, peremption) VALUES ($nom, $prix, $quantite, $peremption)");
+
+      return $objPDOStatement;
+    } 
+
+    public function deleteProduct($product) {
+      $objPDOStatement = $this->PDO->query("DELETE FROM produits WHERE id_produit = $product");
   
-      if($result) {
-        $json["produitsDispos"] = $result;
-      } else {
-        $json["produitsDispos"] = 0;
-      }
-  
-      return json_encode($json, JSON_UNESCAPED_UNICODE);
+      return $objPDOStatement;      
     }
      
     public function getPendingOrders() {
@@ -126,7 +137,7 @@
     } 
     
     public function deleteTable($table) {
-      $objPDOStatement = $this->PDO->query("DELETE * FROM tables WHERE id_table = $table");
+      $objPDOStatement = $this->PDO->query("DELETE FROM tables WHERE id_table = $table");
   
       return $objPDOStatement;      
     }
@@ -158,7 +169,6 @@
       date_timezone_get($date);
 
       $data = json_decode(file_get_contents('php://input'));
-
 
 
       $objPDOStatement = $this->PDO->query("INSERT INTO commande (id_table, email, confirmee, preparee, dateCommande) VALUES ('', '', '0', '0', '$date')");
