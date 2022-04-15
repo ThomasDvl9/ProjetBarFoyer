@@ -20,6 +20,7 @@ const fetchApi = (param) => {
 const produitsTemplate = async () => {
   const produitsDispo = await fetchApi('getAvailableProducts');
 
+  // verif .produitsDispo
   if (produitsDispo != null && Number(produitsDispo.produitsDispo) != 0) {
     const produitsMap = produitsDispo
       .filter((produit) => {
@@ -30,6 +31,7 @@ const produitsTemplate = async () => {
           datePeremption[2],
         ).getTime();
 
+        // filtre produit périmer et quantite
         return Date.now() < dateProduit || Number(produit.qt_dispo);
       })
       .map((produit) => {
@@ -51,42 +53,53 @@ const produitsTemplate = async () => {
       });
 
     sectionElement.append(...produitsMap);
-
-    const btnSubmit = document.querySelector('a[type="button"]');
-    const prixArticle = document.querySelectorAll('article > div > p > .price');
-    const quantiteInp = document.querySelectorAll('input[name="quantite"]');
-
-    btnSubmit.addEventListener('click', async () => {
-      quantiteInp.forEach((inp, index) => {
-        if (Number(inp.value) > 0 && Number(inp.value) % 1) {
-          console.log('Index ' + index + ' : ' + inp.value);
-        }
-      });
-      await fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/addTable', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: JSON.stringify({ table: 45 }),
-      });
-    });
-
-    quantiteInp.forEach((inp) => {
-      inp.addEventListener('change', () => {
-        let sum = 0;
-        quantiteInp.forEach((inp, index) => {
-          sum += Number(inp.value) * Number(prixArticle[index].innerText);
-        });
-        if (sum < 0) {
-          alert('Valeur non valide !');
-        } else {
-          totalElement.innerText = Math.round(sum * 100) / 100;
-        }
-      });
-    });
   } else {
     return null;
   }
 };
 
+const submitListener = () => {
+  const btnSubmit = document.querySelector('a[type="button"]');
+  btnSubmit.addEventListener('click', async () => {
+    quantiteInp.forEach((inp, index) => {
+      // ? % 1
+      if (Number(inp.value) > 0 && Number(inp.value) % 1) {
+        console.log('Index ' + index + ' : ' + inp.value);
+      }
+    });
+    await fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: JSON.stringify({}),
+    });
+  });
+};
+
+const totalFeature = () => {
+  const prixArticle = document.querySelectorAll('article > div > p > .price');
+  // remplacer par produitsDispo prix
+
+  const quantiteInp = document.querySelectorAll('input[name="quantite"]');
+
+  quantiteInp.forEach((inp) => {
+    inp.addEventListener('change', () => {
+      let sum = 0;
+      quantiteInp.forEach((inp, index) => {
+        // sum += Number(inp.value) * Number(produitsDispo[index].prix);
+
+        sum += Number(inp.value) * Number(prixArticle[index].innerText);
+      });
+      if (sum < 0) {
+        alert('Valeur non valide !');
+      } else {
+        totalElement.innerText = Math.round(sum * 100) / 100;
+      }
+    });
+  });
+};
+
 produitsTemplate();
+submitListener();
+totalFeature();
