@@ -2,7 +2,7 @@ const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 
 const fetchApi = (param) => {
-  const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
+  const produits = fetch('http://localhost:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
