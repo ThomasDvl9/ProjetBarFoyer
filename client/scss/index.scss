@@ -1,0 +1,69 @@
+@import 'reset';
+@import 'bases';
+@import 'media';
+
+nav {
+  display: flex;
+  justify-content: space-around;
+}
+
+main {
+  .fa-solid {
+    font-size: 2rem;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .faq {
+    > h4 {
+      font-size: 2.5rem;
+      padding-top: 5rem;
+      text-align: center;
+    }
+
+    .questions {
+      padding: 4rem;
+      display: flex;
+      flex-direction: column;
+
+      .question {
+        padding: 2rem;
+        border: 1px solid #333;
+
+        .title {
+          display: flex;
+          cursor: pointer;
+          justify-content: space-around;
+        }
+
+        .active {
+          i {
+            transform: rotate(180deg);
+          }
+        }
+
+        .content {
+          > h4 {
+            padding: 4rem 0;
+            text-align: center;
+          }
+        }
+
+        #tables {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          > div {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+          }
+        }
+      }
+    }
+  }
+}

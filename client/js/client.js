@@ -7,12 +7,12 @@ const url = new URL(location);
 let id_table = null;
 
 if (url.searchParams.get('table')) {
-  tableid = Number(url.searchParams.get('table'));
-  h3.innerHTML = 'Vous êtes à la table ' + url.searchParams.get('table');
+  id_table = Number(url.searchParams.get('table').split('?')[0]);
+  h3.innerHTML = 'Vous êtes à la table ' + id_table;
 }
 
 const fetchApi = (param) => {
-  const produits = fetch('http://localhost:8080/apifoyer/' + param)
+  const produits = fetch('http://192.168.1.26:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -89,7 +89,7 @@ const totalFeature = (arr) => {
     });
 
     const email = document.querySelector('input[type="email"]').value;
-    const emailReg = /([a-z]@*.*)/g;
+    const emailReg = new RegExp(/[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,24}/);
 
     if (id_table != null && emailReg.test(email)) {
       const obj = {
@@ -97,7 +97,7 @@ const totalFeature = (arr) => {
         email,
         confirmee: 1,
         preparee: 0,
-        dateCmd: new Date().toJSON().split('T').join(' ').split('.')[0],
+        dateCmd: new Date().toJSON().replace('T', ' ').split('.')[0],
       };
 
       await fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/', {

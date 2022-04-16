@@ -2,7 +2,7 @@ const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 
 const fetchApi = (param) => {
-  const produits = fetch('http://localhost:8080/apifoyer/' + param)
+  const produits = fetch('http://192.168.1.26:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
