@@ -6,10 +6,13 @@ const totalElement = document.getElementById('total');
 const url = new URL(location);
 let id_table = null;
 
-if (url.searchParams.get('table')) {
-  id_table = Number(url.searchParams.get('table').split('?')[0]);
-  h3.innerHTML = 'Vous êtes à la table ' + id_table;
+// condition si table n'existe pas
+if (!url.searchParams.get('table')) {
+  location.href = 'http://192.168.1.26:5500/client/pages';
 }
+
+id_table = Number(url.searchParams.get('table').split('?')[0]);
+h3.innerHTML = 'Vous êtes à la table ' + id_table;
 
 const fetchApi = (param) => {
   const produits = fetch('http://192.168.1.26:8080/apifoyer/' + param)

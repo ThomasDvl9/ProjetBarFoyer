@@ -13,7 +13,6 @@
       }
     }
 
-    
     // setcookie("nom", "contenu");
     // session_start();
 
@@ -46,8 +45,21 @@
     }
 
     public function updateProduct() {
-      $objPDOStatement = $this->PDO->query("UPDATE produits SET denomination = '', prix = '', qt_dispo = '', peremption = ''");
-  
+      $data = json_decode(file_get_contents('php://input'));
+
+      $id = $data->id;
+      $nom = $data->nom;
+      $prix = $data->prix;
+      $quantite = $data->quantite;
+      $peremption = $data->peremption;
+      
+      if($id && $nom && $prix && $quantite && $peremption) {
+        $objPDOStatement = $this->PDO->query("UPDATE produits SET denomination = '$nom', qt_dispo = $quantite, prix = $prix, peremption = '$peremption' WHERE id_produit = $id");        
+        http_response_code(200);
+      } else {
+        http_response_code(400);
+      }
+      
       return $objPDOStatement;
     }
 
@@ -59,7 +71,12 @@
       $quantite = $data->quantite;
       $peremption = $data->peremption;
       
-      $objPDOStatement = $this->PDO->query("INSERT INTO produits (denomination, prix, qt_dispo, peremption) VALUES ($nom, $prix, $quantite, $peremption)");
+      if($nom && $prix && $quantite && $peremption) {
+        $objPDOStatement = $this->PDO->query("INSERT INTO produits (denomination, prix, qt_dispo, peremption) VALUES ($nom, $prix, $quantite, $peremption)");
+        http_response_code(200);
+      } else {
+        http_response_code(400);
+      }
 
       return $objPDOStatement;
     } 

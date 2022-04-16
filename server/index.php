@@ -5,10 +5,10 @@ require_once "./Route.php";
 include "./apiFoyer.php";
 header("Access-Control-Allow-Origin: *");
 
-$user = "groupe6";
-$mdp = "Password1234g6";
+$user = "paul";
+$mdp = "Password123!";
 $host = "localhost";
-$base = "foyerbdd_g6";
+$base = "foyerbdd";
 $api = new API_Foyer($base, $user, $mdp, $host);
 
 // ensemble des methodes GET
@@ -41,16 +41,26 @@ Route::add(
 );
 
 Route::add(
+    "/updateProduct",
+    function () {
+        global $api;
+        if($api->updateProduct()) {
+            echo 1;
+        } else {
+            echo 0;
+        }
+    },
+    "post"
+);
+
+Route::add(
     "/addProduct",
     function () {
         global $api;
         $api->addProduct();
-        http_response_code(200);
     },
-    "get"
+    "post"
 );
-
-
 
 Route::add(
     "/getPendingOrders",
@@ -141,7 +151,7 @@ Route::add(
             echo null;
         }
     },
-    "post"
+    "update"
 );
 
 Route::add(
@@ -225,6 +235,6 @@ Route::methodNotAllowed(function () {
     echo "Cette méthode n'existe pas";
 });
 
-Route::run("/~paulhelleu/MiniProjet/index.php");
+Route::run("/apifoyer");
 
 ?>

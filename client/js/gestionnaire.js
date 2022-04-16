@@ -119,7 +119,7 @@ const produitsTemplate = async () => {
         `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="peremption"]`,
       );
 
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         const datePeremption = peremptionInp.value.split('-');
         const dateProduit = new Date(
           datePeremption[0],
@@ -127,27 +127,36 @@ const produitsTemplate = async () => {
           datePeremption[2],
         ).getTime();
         if (Date.now() < dateProduit) {
-          const body = {};
-          alert(
-            'Id produit : ' +
-              e.target.getAttribute('produit-id') +
-              '\nDénomination : ' +
-              denominationInp.value +
-              '\nPrix : ' +
-              prixInp.value +
-              '\nQuantite : ' +
-              quantiteInp.value +
-              '\nPeremption : ' +
-              peremptionInp.value,
-          );
+          const body = {
+            id: e.target.getAttribute('produit-id'),
+            nom: denominationInp.value,
+            prix: prixInp.value,
+            quantite: quantiteInp.value,
+            peremption: peremptionInp.value,
+          };
 
-          // fetch('url', {
-          //   method: 'UPDAT',
-          //   body: JSON.stringify(body),
-          //   headers: {
-          //     'Content-Type': 'application/json',
-          //   },
-          // });
+          // alert(
+          //   'Id produit : ' +
+          //     e.target.getAttribute('produit-id') +
+          //     '\nDénomination : ' +
+          //     denominationInp.value +
+          //     '\nPrix : ' +
+          //     prixInp.value +
+          //     '\nQuantite : ' +
+          //     quantiteInp.value +
+          //     '\nPeremption : ' +
+          //     peremptionInp.value,
+          // );
+
+          await fetch('http://192.168.1.26:8080/apifoyer/updateProduct', {
+            method: 'POST',
+            body: JSON.stringify(body),
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          });
+
+          produitsTemplate();
         } else {
           alert('Date de péremption non valide !');
         }
@@ -225,12 +234,8 @@ const ajouterProduitElement = () => {
       //   },
       //   body: JSON.stringify({}),
       // })
-      //   .then((res) => {
-      //     console.log(res);
-      //   })
-      //   .catch((err) => {
-      //     console.error(err);
-      //   });
+      // .then(res => produitsTemplate())
+      // .catch(err => null)
     });
   });
 
