@@ -21,6 +21,8 @@ Route::add(
     "get"
 );
 
+// PRODUITS
+
 Route::add(
     "/getAvailableProducts",
     function () {
@@ -63,6 +65,26 @@ Route::add(
 );
 
 Route::add(
+    "/deleteProduct",
+    function () {
+        global $api;
+        $product = $_GET['table'];
+        if($product) {
+            if($api->deleteProduct($product)) {
+                http_response_code(200);
+                echo 1;
+                return 1;
+            }
+        } 
+        http_response_code(400);
+        echo 0;
+    },
+    "post"
+);
+
+// COMMANDES
+
+Route::add(
     "/getPendingOrders",
     function () {
         global $api;
@@ -70,6 +92,18 @@ Route::add(
     },
     "get"
 );
+
+Route::add(
+    "/getCommandById",
+    function () {
+        global $api;
+        $id = $_GET["id"];
+        echo $api->getProductById($id);
+    },
+    "get"
+);
+
+// DETAIL_COMMANDES
 
 Route::add(
     "/getCommandsDetails",
@@ -90,32 +124,21 @@ Route::add(
 );
 
 Route::add(
-    "/getCommandById",
-    function () {
+    "/addCommandDetails",
+    function() {
         global $api;
-        $id = $_GET["id"];
-        echo $api->getProductById($id);
+        $id = $api->addCommand();
+        if($id && $api->addCommandDetails($id)) {
+            echo 1;
+            return 1;
+        }
+        echo 0;
+        return 0;
     },
-    "get"
+    "post",
 );
 
-// Route::add(
-//     "/validateOrder",
-//     function () {
-//         global $api;
-//         echo $api->validateOrder();
-//     },
-//     "get"
-// );
-
-// Route::add(
-//     "/hasAccessLevel",
-//     function() {
-//         global $api;
-//         echo $api->hasAccessLevel();
-//     },
-//     "get"
-// );
+// TABLES
 
 Route::add(
     "/getTables", 
@@ -171,14 +194,38 @@ Route::add(
     // "delete" ou "get"
 );
 
+// USERS
+
 Route::add(
-    "/addCommande",
+    "/getUserAccessLevel",
     function() {
         global $api;
-        echo $api->addCommande();
+        if($api->getUserAccessLevel()) {
+            echo $api->getUserAccessLevel();
+        } else {
+            echo 0;
+        }
     },
-    "post"
+    "post",
 );
+
+// Route::add(
+//     "/validateOrder",
+//     function () {
+//         global $api;
+//         echo $api->validateOrder();
+//     },
+//     "get"
+// );
+
+// Route::add(
+//     "/hasAccessLevel",
+//     function() {
+//         global $api;
+//         echo $api->hasAccessLevel();
+//     },
+//     "get"
+// );
 
 /*
 Route::add('/isAlreadyPreordered',function(){
@@ -225,7 +272,7 @@ Route::add('/orderReady',function(){
 
 */
 
-//gestion des messages d'erreur
+// gestion des messages d'erreur
 
 Route::pathNotFound(function () {
     echo "Ce chemin n'existe pas";

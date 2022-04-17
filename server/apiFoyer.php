@@ -2,7 +2,7 @@
 
   class API_Foyer {
   
-    private $PDO;      
+    private $PDO;
 
     public function __construct($base, $username, $password, $host) {
       try {
@@ -15,6 +15,8 @@
 
     // setcookie("nom", "contenu");
     // session_start();
+
+    // PRODUITS
 
     public function getAvailableProducts() {
       $objPDOStatement = $this->PDO->query("SELECT * FROM produits");
@@ -72,20 +74,23 @@
       $peremption = $data->peremption;
       
       if($nom && $prix && $quantite && $peremption) {
-        $objPDOStatement = $this->PDO->query("INSERT INTO produits (denomination, prix, qt_dispo, peremption) VALUES ($nom, $prix, $quantite, $peremption)");
+        $objPDOStatement = $this->PDO->query("INSERT INTO produits (denomination, prix, qt_dispo, peremption) 
+          VALUES ($nom, $prix, $quantite, $peremption)");
         http_response_code(200);
       } else {
         http_response_code(400);
       }
 
       return $objPDOStatement;
-    } 
+    }  
 
     public function deleteProduct($product) {
       $objPDOStatement = $this->PDO->query("DELETE FROM produits WHERE id_produit = $product");
   
       return $objPDOStatement;      
     }
+
+    // COMMANDES
      
     public function getPendingOrders() {
       $objPDOStatement = $this->PDO->query("SELECT * FROM commandes");
@@ -101,6 +106,28 @@
       return json_encode($json, JSON_UNESCAPED_UNICODE);
     }
 
+    public function addCommand() {
+      $data = json_decode(file_get_contents('php://input'));
+
+      $date = date("Y-m-d h:i:s");
+      $email = $data->email;
+      $table = $data->table;
+      
+      if($date && $email) {
+        $this->PDO->query("INSERT INTO commandes 
+          (id_table, email, confirmee, preparee, dateCommande) 
+          VALUES ($table, '$email', 0, 0, '$date')");
+  
+        http_response_code(200);
+        return $this->PDO->lastInsertId();
+      } 
+      
+      http_response_code(400);
+      return 0;
+    }
+
+    // DETAIL COMMANDES
+
     public function getCommandsDetails() {
       $objPDOStatement = $this->PDO->query("SELECT * FROM detail_commandes");
   
@@ -115,6 +142,21 @@
       return json_encode($json, JSON_UNESCAPED_UNICODE);
     }
 
+    // old version
+    // public function getOrdersDetails() {
+    //   $objPDOStatement = $this->PDO->query("SELECT * FROM detail_commandes");
+
+    //   $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+
+    //   if($result) {
+    //     $json["detailCommandes"] = $result;
+    //   } else {
+    //     $json["detailCommandes"] = 0;
+    //   }
+
+    //   return json_encode($json, JSON_UNESCAPED_UNICODE);
+    // } 
+
     public function getCommandDetailById($id) {
       $objPDOStatement = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $id");
   
@@ -128,6 +170,27 @@
   
       return json_encode($json, JSON_UNESCAPED_UNICODE);
     }
+
+    public function addCommandDetails($cmdid) {
+      $data = json_decode(file_get_contents('php://input'));
+      
+      $product = $data->product;
+      $qt = $data->qt;
+      
+      if($cmdid && $product && ((int) $qt % 1) == 0) {
+        $objPDOStatement = $this->PDO->exec("INSERT INTO detail_commandes 
+          (id_commande, id_produit, qt_commandee, cochee) 
+          VALUES ($cmdid, $product, $qt, 0)");
+        
+        http_response_code(200);
+      } else {
+        http_response_code(400);
+      }
+
+      return $objPDOStatement;
+    }
+
+    // TABLES
 
     public function getTables() {
       $objPDOStatement = $this->PDO->query("SELECT * FROM tables");
@@ -159,57 +222,25 @@
       return $objPDOStatement;      
     }
 
-    public function getOrdersDetails() {
-      $objPDOStatement = $this->PDO->query("SELECT * FROM detail_commandes");
+    // AUTH
 
-      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
-
-      if($result) {
-        $json["detailCommandes"] = $result;
-      } else {
-        $json["detailCommandes"] = 0;
-      }
-
-      return json_encode($json, JSON_UNESCAPED_UNICODE);
-    }    
-
-    public function addCommande() {
-      // comment recupérer body requete
-      // email
-      // id_table dans url
-      // confirmee = 0
-      // preparee = 0
-      // dateCommande = date actuel
-
-      $date = date_create();
-
-      date_timezone_get($date);
-
+    public function getUserAccessLevel() {
       $data = json_decode(file_get_contents('php://input'));
+      
+      $role = $data->role;
+      $password = strtoupper(md5($data->password));
 
+      if($role && $password) {
+        $objPDOStatement = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$role' AND _password = '$password'");
 
-      $objPDOStatement = $this->PDO->query("INSERT INTO commande (id_table, email, confirmee, preparee, dateCommande) VALUES ('', '', '0', '0', '$date')");
-
-      return $objPDOStatement;
-    }
-
-    // authentification
-
-    public function getUser() {
-      // récuperer body de la requête
-      $objPDOStatement = $this->PDO->query("SELECT * FROM users");
-
-      // $mdp = md5("Password1234");
-  
-      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
-  
-      if($result) {
-        $json = $result;
-      } else {
-        $json = 0;
+        $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+        
+        if($result) {
+          return json_encode($result, JSON_UNESCAPED_UNICODE);
+        }
       }
-  
-      return json_encode($json, JSON_UNESCAPED_UNICODE);
+      
+      return 0;
     }
 }
 
