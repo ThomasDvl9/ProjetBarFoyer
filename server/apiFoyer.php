@@ -85,9 +85,7 @@
     }  
 
     public function deleteProduct($product) {
-      $objPDOStatement = $this->PDO->query("DELETE FROM produits WHERE id_produit = $product");
-  
-      return $objPDOStatement;      
+      return $this->PDO->exec("DELETE FROM produits WHERE id_produit = $product");
     }
 
     // COMMANDES
@@ -173,29 +171,44 @@
 
     public function addCommandDetails($cmdid) {
       $data = json_decode(file_get_contents('php://input'));
-
+ 
       $productList = $data->productList;
       
-      if($cmdid && $productList) {
-        foreach($productList as $id => $qt) {
-          if(((int) $qt % 1) == 0) {
-            $this->PDO->exec("INSERT INTO detail_commandes 
-              (id_commande, id_produit, qt_commandee, cochee) 
-              VALUES ($cmdid, $id, $qt, 0)");
-          } else {
-            http_response_code(400);
-            return 0;
-          }
-        }
-        http_response_code(200);
-        return 1;
+      if(!($cmdid && $productList)) { 
+        http_response_code(400);
+        return 0;
       }
       
-      http_response_code(400);
-      return 0;
+      foreach($productList as $id => $qt) {
+        if(((int) $qt % 1)) {
+          http_response_code(400);
+          return 0;
+        }
+      }
+      
+      foreach($productList as $id => $qt) {
+        $this->PDO->exec("INSERT INTO detail_commandes 
+          (id_commande, id_produit, qt_commandee, cochee) 
+          VALUES ($cmdid, $id, $qt, 0)");
+      }
+      
+      http_response_code(200);
+      return 1;
     }
 
     // TABLES
+
+    public function getTable($numero) {
+      $objPDOStatement = $this->PDO->query("SELECT * FROM tables WHERE numero = $numero");
+  
+      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+  
+      if ($result) {
+        return json_encode($result, JSON_UNESCAPED_UNICODE); 
+      }
+  
+      return 0;
+    }    
 
     public function getTables() {
       $objPDOStatement = $this->PDO->query("SELECT * FROM tables");
@@ -214,11 +227,22 @@
     public function addTable() {
       $data = json_decode(file_get_contents('php://input'));
 
-      $table = $data->table;
+      $num = $data->num;
+      $lien = $data->lien;
 
-      $objPDOStatement = $this->PDO->query("INSERT INTO tables (numero, lien_QRcode) VALUES ($table, 'null')");
+      if($num && $lien) {
+        $objPDOStatement = $this->PDO->exec("INSERT INTO tables (numero, lien_QRcode) VALUES ($num, $lien)");
+        if($objPDOStatement) {
+          http_response_code(200);
+          return 1;
+        } else {
+          http_response_code(400);
+          return 0;
+        }
+      }
 
-      return $objPDOStatement;
+      http_response_code(400);
+      return 0;
     } 
     
     public function deleteTable($table) {

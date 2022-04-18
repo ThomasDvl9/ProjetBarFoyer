@@ -72,18 +72,21 @@ Route::add(
     "/deleteProduct",
     function () {
         global $api;
-        $product = $_GET['table'];
+        $product = $_GET['product'];
         if($product) {
             if($api->deleteProduct($product)) {
+                echo "result";
                 http_response_code(200);
                 echo 1;
                 return 1;
+            } else {
+                http_response_code(400);
+                echo json_encode("already in command");               
             }
         } 
         http_response_code(400);
-        echo 0;
     },
-    "post"
+    "get"
 );
 
 // COMMANDES
@@ -143,6 +146,23 @@ Route::add(
 );
 
 // TABLES
+
+Route::add(
+    "/getTable",
+    function() {
+        global $api;
+        $numero = $_GET["num"];
+        if($numero) {
+            $res = $api->getTable($numero);
+            if($res) {
+                http_response_code(200);
+                return $res;
+            }
+        }
+        http_response_code(400);
+    },
+    "get",
+);
 
 Route::add(
     "/getTables", 
