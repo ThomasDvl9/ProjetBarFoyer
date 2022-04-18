@@ -2,11 +2,22 @@ const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 
 const fetchApi = (param) => {
-  const produits = fetch('http://192.168.1.26:8080/apifoyer/' + param)
+  const content = fetch('http://192.168.1.26:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
-  return produits;
+  return content;
+};
+
+const fetchApiPost = (param, body) => {
+  const content = fetch('http://192.168.1.26:8080/apifoyer/' + param, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify(body),
+  });
+  return content;
 };
 
 const produitsTemplate = async () => {
@@ -50,6 +61,10 @@ const produitsTemplate = async () => {
         <div class="input-group">
           <label>Date de péremption :</label>
           <input type="date" name="peremption" maxlength="10" minlength="10" value="${produit.peremption}" />
+        </div>
+        <div class="input-group">
+          <label>Source de l'image :</label>
+          <input type="text" name="illustration" value="${produit.illustration}" />
         </div>
         <a produit-id="${produit.id_produit}" class="btn btn-validate btn-container">
           Sauvegarder
@@ -118,6 +133,9 @@ const produitsTemplate = async () => {
       const peremptionInp = document.querySelector(
         `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="peremption"]`,
       );
+      const illustrationInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="illustration"]`,
+      );
 
       btn.addEventListener('click', async (e) => {
         const datePeremption = peremptionInp.value.split('-');
@@ -127,36 +145,21 @@ const produitsTemplate = async () => {
           datePeremption[2],
         ).getTime();
         if (Date.now() < dateProduit) {
-          const body = {
+          await fetchApiPost('updateProduct', {
             id: e.target.getAttribute('produit-id'),
             nom: denominationInp.value,
             prix: prixInp.value,
             quantite: quantiteInp.value,
             peremption: peremptionInp.value,
-          };
-
-          // alert(
-          //   'Id produit : ' +
-          //     e.target.getAttribute('produit-id') +
-          //     '\nDénomination : ' +
-          //     denominationInp.value +
-          //     '\nPrix : ' +
-          //     prixInp.value +
-          //     '\nQuantite : ' +
-          //     quantiteInp.value +
-          //     '\nPeremption : ' +
-          //     peremptionInp.value,
-          // );
-
-          await fetch('http://192.168.1.26:8080/apifoyer/updateProduct', {
-            method: 'POST',
-            body: JSON.stringify(body),
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-          });
-
-          produitsTemplate();
+            illustration: illustrationInp.value,
+          })
+            .then((res) => {
+              res.status;
+            })
+            .then(() => {
+              produitsTemplate();
+            })
+            .catch((err) => console.error(err));
         } else {
           alert('Date de péremption non valide !');
         }
@@ -218,24 +221,41 @@ const ajouterProduitElement = () => {
       <div class="input-group">
         <label>Date de péremption :</label>
         <input type="date" name="peremption" maxlength="10" minlength="10" />
-      </div>`;
+      </div>
+      <div class="input-group">
+        <label>Source de l'image :</label>
+        <input type="text" name="illustration" maxlength="15" />
+      </div>
+      <a class="btn btn-validate btn-container">
+        Enregistrer
+      </a>`;
 
-    const btn = document.createElement('a');
-    btn.className = 'btn btn-validate btn-container';
-    btn.innerText = 'Enregistrer';
-    addProduitElement.appendChild(btn);
+    const btn = addProduitElement.querySelector('a.btn');
 
-    // ajouter produit
     btn.addEventListener('click', async (e) => {
-      // await fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/addProduct', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/x-www-form-urlencoded',
-      //   },
-      //   body: JSON.stringify({}),
-      // })
-      // .then(res => produitsTemplate())
-      // .catch(err => null)
+      const nom = addProduitElement.querySelector('input[name="denomination"]').value;
+      const prix = addProduitElement.querySelector('input[name="prix"]').value;
+      const quantite = addProduitElement.querySelector('input[name="quantite"]').value;
+      const peremption = addProduitElement.querySelector('input[name="peremption"]').value;
+      const illustration = addProduitElement.querySelector('input[name="illustration"]').value;
+
+      if (nom != '' && prix != '' && quantite != '' && peremption != '') {
+        await fetchApiPost('addProduct', {
+          nom,
+          prix,
+          quantite,
+          peremption,
+          illustration,
+        })
+          .then((res) => {
+            if (res.status == 200) {
+              produitsTemplate();
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
     });
   });
 

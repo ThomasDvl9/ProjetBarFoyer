@@ -54,15 +54,16 @@
       $prix = $data->prix;
       $quantite = $data->quantite;
       $peremption = $data->peremption;
+      $illustration = $data->illustration;
       
-      if($id && $nom && $prix && $quantite && $peremption) {
-        $objPDOStatement = $this->PDO->query("UPDATE produits SET denomination = '$nom', qt_dispo = $quantite, prix = $prix, peremption = '$peremption' WHERE id_produit = $id");        
+      if($id && $nom && $prix && $quantite && $peremption && $illustration) {
+        $this->PDO->query("UPDATE produits SET denomination = '$nom', qt_dispo = $quantite, prix = $prix, peremption = '$peremption', illustration = '$illustration' WHERE id_produit = $id");        
         http_response_code(200);
+        return 1;
       } else {
         http_response_code(400);
+        return 0;
       }
-      
-      return $objPDOStatement;
     }
 
     public function addProduct() {
@@ -72,16 +73,15 @@
       $prix = $data->prix;
       $quantite = $data->quantite;
       $peremption = $data->peremption;
+      $illustration = $data->illustration;
       
-      if($nom && $prix && $quantite && $peremption) {
-        $objPDOStatement = $this->PDO->query("INSERT INTO produits (denomination, prix, qt_dispo, peremption) 
-          VALUES ($nom, $prix, $quantite, $peremption)");
+      if($nom && $prix && $quantite && $peremption && $illustration) {
+        $this->PDO->exec("INSERT INTO produits (denomination, prix, qt_dispo, peremption, illustration) 
+          VALUES ('$nom', $prix, $quantite, '$peremption', '$illustration')");
         http_response_code(200);
       } else {
         http_response_code(400);
       }
-
-      return $objPDOStatement;
     }  
 
     public function deleteProduct($product) {
@@ -109,7 +109,7 @@
     public function addCommand() {
       $data = json_decode(file_get_contents('php://input'));
 
-      $date = date("Y-m-d h:i:s");
+      $date = date("Y-m-d H:i:s");
       $email = $data->email;
       $table = $data->table;
       
@@ -173,21 +173,26 @@
 
     public function addCommandDetails($cmdid) {
       $data = json_decode(file_get_contents('php://input'));
-      
-      $product = $data->product;
-      $qt = $data->qt;
-      
-      if($cmdid && $product && ((int) $qt % 1) == 0) {
-        $objPDOStatement = $this->PDO->exec("INSERT INTO detail_commandes 
-          (id_commande, id_produit, qt_commandee, cochee) 
-          VALUES ($cmdid, $product, $qt, 0)");
-        
-        http_response_code(200);
-      } else {
-        http_response_code(400);
-      }
 
-      return $objPDOStatement;
+      $productList = $data->productList;
+      
+      if($cmdid && $productList) {
+        foreach($productList as $id => $qt) {
+          if(((int) $qt % 1) == 0) {
+            $this->PDO->exec("INSERT INTO detail_commandes 
+              (id_commande, id_produit, qt_commandee, cochee) 
+              VALUES ($cmdid, $id, $qt, 0)");
+          } else {
+            http_response_code(400);
+            return 0;
+          }
+        }
+        http_response_code(200);
+        return 1;
+      }
+      
+      http_response_code(400);
+      return 0;
     }
 
     // TABLES

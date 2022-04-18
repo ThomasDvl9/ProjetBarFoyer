@@ -59,7 +59,11 @@ Route::add(
     "/addProduct",
     function () {
         global $api;
-        $api->addProduct();
+        if($api->addProduct()) {
+            echo 1;
+        } else {
+            echo 0; 
+        }
     },
     "post"
 );

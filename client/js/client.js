@@ -3,6 +3,7 @@
 const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
 const totalElement = document.getElementById('total');
+const statusElement = document.getElementById('status');
 const url = new URL(location);
 let id_table = null;
 
@@ -74,6 +75,8 @@ const produitsTemplate = async () => {
       return article;
     });
 
+    sectionElement.innerHTML = '';
+
     sectionElement.append(...produitsMap);
 
     totalFeature(filtreProduits);
@@ -92,6 +95,7 @@ const totalFeature = (arr) => {
         const { value } = inp;
         if (Number(value) % 1 != 0) {
           alert('Valeur non valide !');
+          inp.value = Math.round(Number(inp.value));
         } else {
           sum += Number(value) * Number(arr[index].prix);
         }
@@ -106,26 +110,39 @@ const totalFeature = (arr) => {
   });
 
   const btnSubmit = document.querySelector('a[type="button"]');
+
   btnSubmit.addEventListener('click', async () => {
     const email = document.querySelector('input[type="email"]').value;
     const emailReg = new RegExp(/[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,24}/);
 
-    quantiteInp.forEach(async (inp, index) => {
-      if (
-        Number(inp.value) > 0 &&
-        Number(inp.value) % 1 === 0 &&
-        id_table != null &&
-        emailReg.test(email)
-      ) {
-        console.log('Index ' + arr[index].id_produit + ' : ' + inp.value);
-        await fetchApiPost('addCommandDetails', {
-          product: arr[index].id_produit,
-          qt: inp.value,
-          table: id_table,
-          email,
-        });
+    const obj = {};
+
+    quantiteInp.forEach((inp, index) => {
+      if (Number(inp.value) > 0 && !(Number(inp.value) % 1)) {
+        obj[arr[index].id_produit] = inp.value;
       }
     });
+
+    if (id_table != null && emailReg.test(email) && Object.keys(obj).length) {
+      await fetchApiPost('addCommandDetails', {
+        productList: obj,
+        table: id_table,
+        email,
+      })
+        .then((res) => {
+          if (res.status == 200) {
+            statusElement.className = 'succes';
+            statusElement.innerText = 'Envoyer avec succès !';
+            // alert('Envoyer avec succès !');
+            // produitsTemplate();
+          }
+        })
+        .catch((err) => {
+          statusElement.className = 'error';
+          statusElement.innerText = "Echec lors de l'envoie !";
+          // alert("Echec lors de l'envoie !");
+        });
+    }
   });
 };
 

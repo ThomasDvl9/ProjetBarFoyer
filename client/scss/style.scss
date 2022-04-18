@@ -6,6 +6,9 @@
   padding: 1.3rem;
   font-family: 'Poppins', sans-serif;
   cursor: pointer;
+  &[type='button'] {
+    margin-top: 4rem;
+  }
   &-primary {
     border: 0.2rem solid #333;
     border-radius: 0.3rem;
@@ -45,6 +48,21 @@ input {
   margin: 1.5rem 0;
   display: flex;
   flex-direction: column;
+}
+
+#status {
+  padding: 3rem 0;
+  font-style: italic;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+}
+
+.succes {
+  color: #2ecc71;
+}
+
+.error {
+  color: #e74c3c;
 }
 
 /* HEADER */
