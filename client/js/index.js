@@ -19,18 +19,17 @@ titleElements.forEach((element, index) => {
 
 const tablesTemplate = async () => {
   const tables = await fetchApi('getTables');
-  const elements = [];
 
-  for (let i = 0; i < tables.length; i++) {
+  const elements = tables.map((table) => {
     const element = document.createElement('div');
-    element.innerHTML = '<i class="fa-solid fa-qrcode"></i> <h4>' + (i + 1) + '</h4>';
+    element.innerHTML = '<i class="fa-solid fa-qrcode"></i> <h4>' + table.numero + '</h4>';
 
-    elements.push(element);
-
-    element.addEventListener('click', () => {
-      location.href = 'http://192.168.1.26:5500/client/pages/client.html?table=' + (i + 1);
+    element.addEventListener('click', (e) => {
+      location.href = 'http://192.168.1.26:5500/client/pages/client.html?table=' + table.numero;
     });
-  }
+
+    return element;
+  });
 
   tablesElement.append(...elements);
 };

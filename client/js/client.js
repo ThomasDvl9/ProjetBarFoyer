@@ -1,22 +1,20 @@
-// import fetchApi from './fetchApi.js';
-
 const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
 const totalElement = document.getElementById('total');
 const statusElement = document.getElementById('status');
 const url = new URL(location);
-let id_table = null;
+let table = null;
 
-const fetchApi = (param) => {
-  const content = fetch('http://192.168.1.26:8080/apifoyer/' + param)
+const fetchApiToJson = (method) => {
+  const content = fetch('http://192.168.1.26:8080/apifoyer/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
   return content;
 };
 
-const fetchApiPost = (param, body) => {
-  const content = fetch('http://192.168.1.26:8080/apifoyer/' + param, {
+const fetchApiPost = (method, body) => {
+  const content = fetch('http://192.168.1.26:8080/apifoyer/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -27,21 +25,23 @@ const fetchApiPost = (param, body) => {
 };
 
 const checkTableValidation = async () => {
-  id_table = Number(url.searchParams.get('table').split('?')[0]);
+  const numero = Number(url.searchParams.get('table').split('?')[0]);
 
   // condition si table n'existe pas
-  const tables = await fetchApi('getTables');
-  if (!(id_table && id_table <= tables.length)) {
+  const tab = await fetchApiToJson('getTable?num=' + numero);
+  if (!(tab && tab.length)) {
     location.href = 'http://192.168.1.26:5500/client/pages';
   }
 
-  h3.innerHTML = 'Vous êtes à la table ' + id_table;
+  table = tab[0].id_table;
+
+  h3.innerHTML = 'Vous êtes à la table ' + numero;
 };
 
 checkTableValidation();
 
 const produitsTemplate = async () => {
-  const produitsDispo = await fetchApi('getAvailableProducts');
+  const produitsDispo = await fetchApiToJson('getAvailableProducts');
 
   if (produitsDispo != null && Number(produitsDispo) != 0) {
     const filtreProduits = produitsDispo.filter((produit) => {
@@ -69,7 +69,11 @@ const produitsTemplate = async () => {
           </div>
         </div>
         <div>
-          <img src="../img/${produit.illustration}" alt="icon" />
+          <img src="../img/${
+            String(produit.illustration).toLowerCase() === 'null'
+              ? 'no-image.png'
+              : produit.illustration
+          }" alt="icon" />
         </div>`;
 
       return article;
@@ -96,9 +100,8 @@ const totalFeature = (arr) => {
         if (Number(value) % 1 != 0) {
           alert('Valeur non valide !');
           inp.value = Math.round(Number(inp.value));
-        } else {
-          sum += Number(value) * Number(arr[index].prix);
         }
+        sum += Number(inp.value) * Number(arr[index].prix);
       });
 
       if (sum < 0) {
@@ -117,32 +120,40 @@ const totalFeature = (arr) => {
 
     const obj = {};
 
-    quantiteInp.forEach((inp, index) => {
-      if (Number(inp.value) > 0 && !(Number(inp.value) % 1)) {
-        obj[arr[index].id_produit] = inp.value;
+    quantiteInp.forEach(({ value }, index) => {
+      if (Number(value) > 0 && !(Number(value) % 1) && Number(value) != NaN) {
+        obj[arr[index].id_produit] = value;
       }
     });
 
-    if (id_table != null && emailReg.test(email) && Object.keys(obj).length) {
-      await fetchApiPost('addCommandDetails', {
-        productList: obj,
-        table: id_table,
-        email,
-      })
-        .then((res) => {
-          if (res.status == 200) {
-            statusElement.className = 'succes';
-            statusElement.innerText = 'Envoyer avec succès !';
-            // alert('Envoyer avec succès !');
-            // produitsTemplate();
-          }
-        })
-        .catch((err) => {
-          statusElement.className = 'error';
-          statusElement.innerText = "Echec lors de l'envoie !";
-          // alert("Echec lors de l'envoie !");
-        });
+    statusElement.classList = 'error';
+
+    if (!emailReg.test(email)) {
+      statusElement.innerText = 'Email non valide !';
+      return 0;
     }
+
+    if (!Object.keys(obj).length) {
+      statusElement.innerText = 'Aucun produit commander !';
+      return 0;
+    }
+
+    await fetchApiPost('addCommandDetails', {
+      productList: obj,
+      table,
+      email,
+    })
+      .then((res) => {
+        if (res.status == 200) {
+          statusElement.classList = 'success';
+          statusElement.innerText = 'Envoyer avec succès !';
+        } else {
+          statusElement.innerText = 'Données envoyés non valides !';
+        }
+      })
+      .catch((err) => {
+        console.error('err : ', err);
+      });
   });
 };
 

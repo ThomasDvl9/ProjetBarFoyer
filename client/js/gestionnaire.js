@@ -1,12 +1,16 @@
 const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 
-const fetchApi = (param) => {
+const fetchApiJson = (param) => {
   const content = fetch('http://192.168.1.26:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
   return content;
+};
+
+const fetchApi = (param) => {
+  return fetch('http://192.168.1.26:8080/apifoyer/' + param);
 };
 
 const fetchApiPost = (param, body) => {
@@ -21,31 +25,24 @@ const fetchApiPost = (param, body) => {
 };
 
 const produitsTemplate = async () => {
-  const produitsDispo = await fetchApi('getAvailableProducts');
-  const tables = await fetchApi('getTables');
+  const produitsDispo = await fetchApiJson('getAvailableProducts');
 
-  if (
-    produitsDispo != null &&
-    Number(produitsDispo.produitsDispo) != 0 &&
-    tables != null &&
-    Number(tables) != 0
-  ) {
-    const produitsMap = produitsDispo.map((produit) => {
-      const article = document.createElement('article');
-      article.setAttribute('produit-id', produit.id_produit);
+  if (produitsDispo === null && Number(produitsDispo.produitsDispo) === 0) {
+    return null;
+  }
 
-      const datePeremption = produit.peremption.split('-');
-      const dateProduit = new Date(
-        datePeremption[0],
-        datePeremption[1],
-        datePeremption[2],
-      ).getTime();
-      if (Date.now() > dateProduit) {
-        article.className = 'red';
-        article.innerHTML = '<h4>Produit périmé</h4>';
-      }
+  const produitsMap = produitsDispo.map((produit) => {
+    const article = document.createElement('article');
+    article.setAttribute('produit-id', produit.id_produit);
 
-      article.innerHTML += `
+    const datePeremption = produit.peremption.split('-');
+    const dateProduit = new Date(datePeremption[0], datePeremption[1], datePeremption[2]).getTime();
+    if (Date.now() > dateProduit) {
+      article.className = 'red';
+      article.innerHTML = '<h4>Produit périmé</h4>';
+    }
+
+    article.innerHTML += `
         <div class="input-group">
           <label>Nom :</label>
           <input type="text" name="denomination" value="${produit.denomination}" />
@@ -73,9 +70,85 @@ const produitsTemplate = async () => {
           Supprimer
         </a>
       `;
-      return article;
+    return article;
+  });
+
+  sectionProduitElement.innerText = '';
+
+  sectionProduitElement.append(...produitsMap);
+
+  // Fonction ajouter
+
+  sectionProduitElement.appendChild(ajouterProduitElement());
+
+  // Edition produit
+
+  const validateBtnProduit = document.querySelectorAll('article[produit-id] > a.btn-validate');
+  const deleteBtnProduit = document.querySelectorAll('article[produit-id] > a.btn-delete');
+
+  validateBtnProduit.forEach((btn, index) => {
+    const denominationInp = document.querySelector(
+      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="denomination"]`,
+    );
+    const prixInp = document.querySelector(
+      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="prix"]`,
+    );
+    const quantiteInp = document.querySelector(
+      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="quantite"]`,
+    );
+    const peremptionInp = document.querySelector(
+      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="peremption"]`,
+    );
+    const illustrationInp = document.querySelector(
+      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="illustration"]`,
+    );
+
+    btn.addEventListener('click', async (e) => {
+      const datePeremption = peremptionInp.value.split('-');
+      const dateProduit = new Date(
+        datePeremption[0],
+        datePeremption[1],
+        datePeremption[2],
+      ).getTime();
+      if (Date.now() < dateProduit) {
+        await fetchApiPost('updateProduct', {
+          id: e.target.getAttribute('produit-id'),
+          nom: denominationInp.value,
+          prix: prixInp.value,
+          quantite: quantiteInp.value,
+          peremption: peremptionInp.value,
+          illustration: illustrationInp.value,
+        })
+          .then((res) => {
+            res.status;
+          })
+          .then(() => {
+            produitsTemplate();
+          })
+          .catch((err) => console.error(err));
+      } else {
+        alert('Date de péremption non valide !');
+      }
     });
 
+    deleteBtnProduit[index].addEventListener('click', async (e) => {
+      const id = e.target.getAttribute('produit-id');
+      await fetchApi('deleteProduct' + '?product=' + id)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json === 'already in command') {
+            alert('Ce produit appartient à une commande');
+          }
+        })
+        .catch((err) => produitsTemplate());
+    });
+  });
+};
+
+const tablesTemplate = async () => {
+  const tables = await fetchApiJson('getTables');
+
+  if (tables != null && Number(tables) != 0) {
     const tablesMap = tables.map((table) => {
       const article = document.createElement('article');
       article.setAttribute('table-id', table.id_table);
@@ -101,70 +174,18 @@ const produitsTemplate = async () => {
       return article;
     });
 
-    sectionProduitElement.innerText = '';
     sectionTableElement.innerText = '';
 
-    sectionProduitElement.append(...produitsMap);
     sectionTableElement.append(...tablesMap);
 
     // Fonction ajouter
 
-    sectionProduitElement.appendChild(ajouterProduitElement());
     sectionTableElement.appendChild(ajouterTableElement());
 
-    // Edition produit
-
-    const validateBtnProduit = document.querySelectorAll('article[produit-id] > a.btn-validate');
-    const deleteBtnProduit = document.querySelectorAll('article[produit-id] > a.btn-delete');
+    // Edition table
 
     const validateBtnTable = document.querySelectorAll('article[table-id] > a.btn-validate');
     const deleteBtnTable = document.querySelectorAll('article[table-id] > a.btn-delete');
-
-    validateBtnProduit.forEach((btn) => {
-      const denominationInp = document.querySelector(
-        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="denomination"]`,
-      );
-      const prixInp = document.querySelector(
-        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="prix"]`,
-      );
-      const quantiteInp = document.querySelector(
-        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="quantite"]`,
-      );
-      const peremptionInp = document.querySelector(
-        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="peremption"]`,
-      );
-      const illustrationInp = document.querySelector(
-        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="illustration"]`,
-      );
-
-      btn.addEventListener('click', async (e) => {
-        const datePeremption = peremptionInp.value.split('-');
-        const dateProduit = new Date(
-          datePeremption[0],
-          datePeremption[1],
-          datePeremption[2],
-        ).getTime();
-        if (Date.now() < dateProduit) {
-          await fetchApiPost('updateProduct', {
-            id: e.target.getAttribute('produit-id'),
-            nom: denominationInp.value,
-            prix: prixInp.value,
-            quantite: quantiteInp.value,
-            peremption: peremptionInp.value,
-            illustration: illustrationInp.value,
-          })
-            .then((res) => {
-              res.status;
-            })
-            .then(() => {
-              produitsTemplate();
-            })
-            .catch((err) => console.error(err));
-        } else {
-          alert('Date de péremption non valide !');
-        }
-      });
-    });
 
     validateBtnTable.forEach((btn) => {
       const numeroInp = document.querySelector(
@@ -188,13 +209,17 @@ const produitsTemplate = async () => {
 
     deleteBtnTable.forEach((btn) => {
       btn.addEventListener('click', async (e) => {
-        await fetchApi('deleteTable?table=' + e.target.getAttribute('table-id'));
-
-        produitsTemplate();
+        const id = e.target.getAttribute('table-id');
+        await fetchApi('deleteTable?table=' + id)
+          .then((res) => res.json())
+          .then((json) => {
+            if (json === 'already in command') {
+              alert('Cette table appartient à une commande');
+            }
+          })
+          .catch((err) => tablesTemplate());
       });
     });
-  } else {
-    return null;
   }
 };
 
@@ -278,27 +303,32 @@ const ajouterTableElement = () => {
       <div class="input-group">
         <label>Lien QR-code :</label>
         <input type="text" name="qr-code" />
-      </div>`;
-    const btn = document.createElement('a');
-    btn.className = 'btn btn-validate btn-container';
-    btn.innerText = 'Enregistrer';
-    tableElement.appendChild(btn);
+      </div>
+      <a class="btn btn-validate btn-container">
+        Enregistrer
+      </a>`;
+
+    const btn = tableElement.querySelector('a.btn');
 
     // ajouter table
     btn.addEventListener('click', async () => {
-      await fetch('url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: JSON.stringify({ numero: '', lien: '' }),
-      })
-        .then((res) => {
-          console.log(res);
+      const num = tableElement.querySelector('input[name="numero"]').value;
+      const lien = tableElement.querySelector('input[name="qr-code"]').value;
+
+      if (num && lien) {
+        await fetchApiPost('addTable', {
+          num,
+          lien,
         })
-        .catch((err) => {
-          console.error(err);
-        });
+          .then((res) => {
+            if (res.status == 200) {
+              tablesTemplate();
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
     });
   });
 
@@ -307,3 +337,4 @@ const ajouterTableElement = () => {
 };
 
 produitsTemplate();
+tablesTemplate();
