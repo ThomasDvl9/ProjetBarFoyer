@@ -135,10 +135,24 @@ Route::add(
         global $api;
         $id = $api->addCommand();
         if($id && $api->addCommandDetails($id)) {
-            echo $id;
-            echo "\n" . $api->createToken($id) . "\n";
-            return 1;
+            return $api->createToken($id);
         }
+        return 0;
+    },
+    "post",
+);
+
+Route::add(
+    "/checkValidationToken",
+    function() {
+        global $api;
+        $cmdid = $api->decodeToken();
+        if($cmdid) {
+            http_response_code(200);
+            json_encode($json["cmdid"] = $cmdid);
+            return 1;   
+        }
+        http_response_code(400);
         return 0;
     },
     "post",

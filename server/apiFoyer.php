@@ -1,5 +1,7 @@
 <?php
 
+  define("MINUTES", 15);
+
   class API_Foyer {
   
     private $PDO;
@@ -270,16 +272,51 @@
     }
 
     public function createToken($cmdid) {
-      if($cmdid) {
-        $encrypt_method = "AES-256-CBC";
-        $key = '08086b54-ca82-4804-8e9a-fe83f796c558';
-        $iv = '4024d606-0116-47';
+      $validity_timer = time() + 60 * MINUTES;
+
+      $content = $cmdid . "." . $validity_timer;
       
-        $token = base64_encode(openssl_encrypt($cmdid, $encrypt_method, $key, 0, $iv));
-        
-        return $token;
+      $encrypt_method = "AES-256-CBC";
+      $key = hash("sha256", '08086b54-ca82-4804-8e9a-fe83f796c558');
+      $iv = '4024d606a0116e47';
+    
+      $token = base64_encode(openssl_encrypt($content, $encrypt_method, $key, 0, $iv));
+      
+      return $token;
+    }
+    
+    public function decodeToken() {   
+      $data = json_decode(file_get_contents('php://input'));
+      
+      $token = $data->token;
+
+      $encrypt_method = "AES-256-CBC";
+      $key = hash("sha256", '08086b54-ca82-4804-8e9a-fe83f796c558');
+      $iv = '4024d606a0116e47';
+
+      if(!$token) {
+        return 0;
       }
-    }    
+
+      $content = openssl_decrypt(base64_decode($token), $encrypt_method, $key, 0, $iv);  
+
+      if(!$content) {
+        return 0;
+      }
+      
+      $len = strlen($content);
+      $split = strpos($content, ".");
+
+      $tokenDate = substr($content, $split + 1, $len);
+
+      if($tokenDate < time()) {
+        return false;
+      }
+
+      $cmdid = substr($content, 0, $split);       
+      
+      return $cmdid;
+    }  
 }
 
 

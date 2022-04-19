@@ -2,6 +2,8 @@ const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
 const totalElement = document.getElementById('total');
 const statusElement = document.getElementById('status');
+let quantiteInp = null;
+
 const url = new URL(location);
 let table = null;
 
@@ -43,55 +45,54 @@ checkTableValidation();
 const produitsTemplate = async () => {
   const produitsDispo = await fetchApiToJson('getAvailableProducts');
 
-  if (produitsDispo != null && Number(produitsDispo) != 0) {
-    const filtreProduits = produitsDispo.filter((produit) => {
-      const datePeremption = produit.peremption.split('-');
-      const dateProduit = new Date(
-        datePeremption[0],
-        datePeremption[1],
-        datePeremption[2],
-      ).getTime();
-
-      // filtre produit périmer et quantite
-      return Date.now() < dateProduit && Number(produit.qt_dispo);
-    });
-
-    const produitsMap = filtreProduits.map((produit) => {
-      const article = document.createElement('article');
-      article.classList = 'products';
-      article.innerHTML = `
-        <div>
-          <p>Nom : ${produit.denomination}</p>
-          <p>Prix : <span class="price">${produit.prix}</span> €</p>
-          <div class="input-group">
-            <label>Quantite :</label>
-            <input type="number" name="quantite" value="0" min="0" max="${produit.qt_dispo}" />
-          </div>
-        </div>
-        <div>
-          <img src="../img/${
-            String(produit.illustration).toLowerCase() === 'null'
-              ? 'no-image.png'
-              : produit.illustration
-          }" alt="icon" />
-        </div>`;
-
-      return article;
-    });
-
-    sectionElement.innerHTML = '';
-
-    sectionElement.append(...produitsMap);
-
-    totalFeature(filtreProduits);
-  } else {
-    return null;
+  if (produitsDispo === null && Number(produitsDispo) === 0) {
+    return 0;
   }
+
+  const filtreProduits = produitsDispo.filter((produit) => {
+    const datePeremption = produit.peremption.split('-');
+    const dateProduit = new Date(datePeremption[0], datePeremption[1], datePeremption[2]).getTime();
+
+    // filtre produit périmer et quantite
+    return Date.now() < dateProduit && Number(produit.qt_dispo);
+  });
+
+  const produitsMap = filtreProduits.map((produit) => {
+    const article = document.createElement('article');
+    article.classList = 'products';
+    article.innerHTML = `
+      <div>
+        <p>Nom : ${produit.denomination}</p>
+        <p>Prix : <span class="price">${produit.prix}</span> €</p>
+        <div class="input-group">
+          <label>Quantite :</label>
+          <input type="number" name="quantite" pattern="\\d*" value="0" min="0" max="${
+            produit.qt_dispo
+          }" />
+        </div>
+      </div>
+      <div>
+        <img src="../img/${
+          String(produit.illustration).toLowerCase() === 'null'
+            ? 'no-image.png'
+            : produit.illustration
+        }" alt="icon" />
+      </div>`;
+
+    return article;
+  });
+
+  sectionElement.innerHTML = '';
+
+  sectionElement.append(...produitsMap);
+
+  quantiteInp = document.querySelectorAll('input[name="quantite"]');
+
+  totalFeature(filtreProduits);
+  verifySubmit(filtreProduits);
 };
 
 const totalFeature = (arr) => {
-  const quantiteInp = document.querySelectorAll('input[name="quantite"]');
-
   quantiteInp.forEach((inp) => {
     inp.addEventListener('change', () => {
       let sum = 0;
@@ -111,7 +112,9 @@ const totalFeature = (arr) => {
       }
     });
   });
+};
 
+const verifySubmit = (arr) => {
   const btnSubmit = document.querySelector('a[type="button"]');
 
   btnSubmit.addEventListener('click', async () => {
@@ -121,20 +124,25 @@ const totalFeature = (arr) => {
     const obj = {};
 
     quantiteInp.forEach(({ value }, index) => {
-      if (Number(value) > 0 && !(Number(value) % 1) && Number(value) != NaN) {
+      if (Number(value) === NaN) {
+        statusElement.innerText = 'Valeur commander non valide !';
+        return 0;
+      }
+
+      if (Number(value) > 0 && !(Number(value) % 1)) {
         obj[arr[index].id_produit] = value;
       }
     });
 
     statusElement.classList = 'error';
 
-    if (!emailReg.test(email)) {
-      statusElement.innerText = 'Email non valide !';
+    if (!Object.keys(obj).length) {
+      statusElement.innerText = 'Aucun produit commandé !';
       return 0;
     }
 
-    if (!Object.keys(obj).length) {
-      statusElement.innerText = 'Aucun produit commander !';
+    if (!emailReg.test(email)) {
+      statusElement.innerText = 'Email non valide !';
       return 0;
     }
 

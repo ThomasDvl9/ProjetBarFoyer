@@ -251,7 +251,7 @@ const ajouterProduitElement = () => {
       </div>
       <div class="input-group">
         <label>Source de l'image :</label>
-        <input type="text" name="illustration" maxlength="15" />
+        <input type="text" name="illustration" value="null" maxlength="15" />
       </div>
       <a class="btn btn-validate btn-container">
         Enregistrer
