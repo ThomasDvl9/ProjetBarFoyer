@@ -1,12 +1,23 @@
 const sectionElement = document.querySelector('section');
 
 const fetchApi = (param) => {
-  const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
+  const produits = fetch('http://192.168.1.26:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
   return produits;
 };
+
+let refresh = setInterval(() => {
+  commandesTemplate();
+}, 5000);
+
+document.addEventListener('mousemove', (e) => {
+  clearInterval(refresh);
+  refresh = setInterval(() => {
+    commandesTemplate();
+  }, 5000);
+});
 
 const commandesTemplate = async () => {
   const commandesDispo = await fetchApi('getPendingOrders');
@@ -23,7 +34,6 @@ const commandesTemplate = async () => {
       `;
 
       const productDivElement = document.createElement('div');
-      console.log({ commandesDispo, detailsCommande, products });
 
       article.appendChild(productDivElement);
 
@@ -43,9 +53,5 @@ const commandesTemplate = async () => {
     return null;
   }
 };
-
-setInterval(() => {
-  commandesTemplate();
-}, 5000);
 
 commandesTemplate();

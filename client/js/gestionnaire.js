@@ -138,6 +138,8 @@ const produitsTemplate = async () => {
         .then((json) => {
           if (json === 'already in command') {
             alert('Ce produit appartient à une commande');
+          } else {
+            throw 'send';
           }
         })
         .catch((err) => produitsTemplate());
@@ -187,7 +189,7 @@ const tablesTemplate = async () => {
     const validateBtnTable = document.querySelectorAll('article[table-id] > a.btn-validate');
     const deleteBtnTable = document.querySelectorAll('article[table-id] > a.btn-delete');
 
-    validateBtnTable.forEach((btn) => {
+    validateBtnTable.forEach((btn, index) => {
       const numeroInp = document.querySelector(
         `article[table-id="${btn.getAttribute('table-id')}"] input[name="numero"]`,
       );
@@ -205,16 +207,16 @@ const tablesTemplate = async () => {
             qrCodeInp.value,
         );
       });
-    });
 
-    deleteBtnTable.forEach((btn) => {
-      btn.addEventListener('click', async (e) => {
+      deleteBtnTable[index].addEventListener('click', async (e) => {
         const id = e.target.getAttribute('table-id');
         await fetchApi('deleteTable?table=' + id)
           .then((res) => res.json())
           .then((json) => {
             if (json === 'already in command') {
               alert('Cette table appartient à une commande');
+            } else {
+              throw 'send';
             }
           })
           .catch((err) => tablesTemplate());

@@ -75,7 +75,6 @@ Route::add(
         $product = $_GET['product'];
         if($product) {
             if($api->deleteProduct($product)) {
-                echo "result";
                 http_response_code(200);
                 echo 1;
                 return 1;
@@ -136,10 +135,10 @@ Route::add(
         global $api;
         $id = $api->addCommand();
         if($id && $api->addCommandDetails($id)) {
-            echo 1;
+            echo $id;
+            echo "\n" . $api->createToken($id) . "\n";
             return 1;
         }
-        echo 0;
         return 0;
     },
     "post",
@@ -205,17 +204,21 @@ Route::add(
     "/deleteTable",
     function() {
         global $api;
-        if (isset($_GET['table'])) {
-            // check accessLevel = 0
-            $table = $_GET['table'];
-            $api->deleteTable($table);
-            http_response_code(200);
-        } else {
-            echo null;
-        }
+        $table = $_GET['table'];
+        // check accessLevel = 0
+        if($table) {
+            if($api->deleteTable($table)) {
+                http_response_code(200);
+                return 1;
+            } else {
+                http_response_code(400);
+                return json_encode("already in command");               
+            }
+        } 
+        http_response_code(400);
+        return 0;
     },
     "get"
-    // "delete" ou "get"
 );
 
 // USERS

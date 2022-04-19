@@ -9,7 +9,6 @@
         $this->PDO = new PDO("mysql:dbname=" . $base . ";host=" . $host, $username, $password);
       } catch(Exception $err) {
         echo "erreur db : " . utf8_encode($err->getMessage()) . "<br/>";
-        $PDO = null;
       }
     }
 
@@ -159,7 +158,7 @@
       $objPDOStatement = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $id");
   
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
-  
+   
       if($result) {
         $json = $result;        
       } else {
@@ -246,9 +245,7 @@
     } 
     
     public function deleteTable($table) {
-      $objPDOStatement = $this->PDO->query("DELETE FROM tables WHERE id_table = $table");
-  
-      return $objPDOStatement;      
+      return $this->PDO->query("DELETE FROM tables WHERE id_table = $table");     
     }
 
     // AUTH
@@ -271,6 +268,18 @@
       
       return 0;
     }
+
+    public function createToken($cmdid) {
+      if($cmdid) {
+        $encrypt_method = "AES-256-CBC";
+        $key = '08086b54-ca82-4804-8e9a-fe83f796c558';
+        $iv = '4024d606-0116-47';
+      
+        $token = base64_encode(openssl_encrypt($cmdid, $encrypt_method, $key, 0, $iv));
+        
+        return $token;
+      }
+    }    
 }
 
 
