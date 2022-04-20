@@ -90,6 +90,14 @@
     }
 
     // COMMANDES
+
+    public function getCommandById($cmdid) {
+      $objPDOStatement = $this->PDO->query("SELECT * FROM commandes WHERE id_commande = $cmdid");
+
+      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+      
+      return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
+    }
      
     public function getPendingOrders() {
       $objPDOStatement = $this->PDO->query("SELECT * FROM commandes");
@@ -156,18 +164,12 @@
     //   return json_encode($json, JSON_UNESCAPED_UNICODE);
     // } 
 
-    public function getCommandDetailById($id) {
+    public function getCommandDetailByCommandId($id) {
       $objPDOStatement = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $id");
   
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
-   
-      if($result) {
-        $json = $result;        
-      } else {
-        $json = 0;
-      }
   
-      return json_encode($json, JSON_UNESCAPED_UNICODE);
+      return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
 
     public function addCommandDetails($cmdid) {
@@ -290,17 +292,17 @@
     }
     
     public function decodeToken() {   
-      $data = json_decode(file_get_contents('php://input'));
-      
+      $data = json_decode(file_get_contents('php://input'));  
+
+      if(!$data->token) {
+        return 0;
+      }
+
       $token = $data->token;
 
       $encrypt_method = "AES-256-CBC";
       $key = '08086b54-ca82-4804-8e9a-fe83f796c558';
       $iv = '4024d606a0116e47';
-
-      if(!$token) {
-        return 0;
-      }
 
       $content = openssl_decrypt(base64_decode($token), $encrypt_method, $key, 0, $iv);  
 

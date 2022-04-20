@@ -166,7 +166,6 @@ const verifySubmit = (arr) => {
         return res.json();
       })
       .then((json) => {
-        console.log(json);
         createCookie(json);
       })
       .catch((err) => {

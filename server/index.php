@@ -104,7 +104,9 @@ Route::add(
     function () {
         global $api;
         $id = $_GET["id"];
-        echo $api->getProductById($id);
+        if($id) {
+            return$api->getCommandById($id);
+        } 
     },
     "get"
 );
@@ -121,10 +123,15 @@ Route::add(
 );
 
 Route::add(
-    "/getCommandDetailById",
+    "/getCommandDetailByCommandId",
     function() {
         global $api;
-        echo $api->getCommandDetailById($_GET["id"]);
+        $id = $_GET["id"];
+        if($id) {
+            return $api->getCommandDetailByCommandId($id);
+        }
+        http_response_code(400);
+        return 0;
     },
     "get"
 );
