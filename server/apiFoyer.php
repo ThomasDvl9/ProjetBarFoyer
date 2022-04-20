@@ -277,10 +277,14 @@
       $content = $cmdid . "." . $validity_timer;
       
       $encrypt_method = "AES-256-CBC";
-      $key = hash("sha256", '08086b54-ca82-4804-8e9a-fe83f796c558');
+      $key = '08086b54-ca82-4804-8e9a-fe83f796c558';
       $iv = '4024d606a0116e47';
     
       $token = base64_encode(openssl_encrypt($content, $encrypt_method, $key, 0, $iv));
+
+      if(!$token) {
+        return 0;
+      }
       
       return $token;
     }
@@ -291,7 +295,7 @@
       $token = $data->token;
 
       $encrypt_method = "AES-256-CBC";
-      $key = hash("sha256", '08086b54-ca82-4804-8e9a-fe83f796c558');
+      $key = '08086b54-ca82-4804-8e9a-fe83f796c558';
       $iv = '4024d606a0116e47';
 
       if(!$token) {

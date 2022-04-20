@@ -24,34 +24,34 @@ const commandesTemplate = async () => {
   const detailsCommande = await fetchApi('getCommandsDetails');
   const products = await fetchApi('getAvailableProducts');
 
-  if (commandesDispo != null && commandesDispo != 0) {
-    const commandesMap = commandesDispo.map((commande) => {
-      const article = document.createElement('article');
-      article.innerHTML = `
-        <p>ID Commande : ${commande.id_commande}</p>
-        <p>ID table : ${commande.id_table}</p>
-        <p>Produits :</p>
-      `;
-
-      const productDivElement = document.createElement('div');
-
-      article.appendChild(productDivElement);
-
-      return article;
-    });
-
-    sectionElement.innerHTML = '';
-    sectionElement.append(...commandesMap);
-
-    const inputElement = document.querySelectorAll('input');
-    inputElement.forEach((input) => {
-      input.addEventListener('change', () => {
-        console.log('Input change');
-      });
-    });
-  } else {
-    return null;
+  if (commandesDispo === null && commandesDispo == 0) {
+    return 0;
   }
+
+  const commandesMap = commandesDispo.map((commande) => {
+    const article = document.createElement('article');
+    article.innerHTML = `
+      <p>ID Commande : ${commande.id_commande}</p>
+      <p>ID table : ${commande.id_table}</p>
+      <p>Produits :</p>
+    `;
+
+    const productDivElement = document.createElement('div');
+
+    article.appendChild(productDivElement);
+
+    return article;
+  });
+
+  sectionElement.innerHTML = '';
+  sectionElement.append(...commandesMap);
+
+  const inputElement = document.querySelectorAll('input');
+  inputElement.forEach((input) => {
+    input.addEventListener('change', () => {
+      console.log('Input change');
+    });
+  });
 };
 
 commandesTemplate();

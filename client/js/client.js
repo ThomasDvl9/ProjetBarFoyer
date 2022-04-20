@@ -26,6 +26,11 @@ const fetchApiPost = (method, body) => {
   return content;
 };
 
+const createCookie = async (token) => {
+  document.cookie =
+    'cmd-token=' + token + '; expires=' + new Date(Date.now() + 1000 * 60 * 15).toGMTString();
+};
+
 const checkTableValidation = async () => {
   const numero = Number(url.searchParams.get('table').split('?')[0]);
 
@@ -158,6 +163,11 @@ const verifySubmit = (arr) => {
         } else {
           statusElement.innerText = 'Données envoyés non valides !';
         }
+        return res.json();
+      })
+      .then((json) => {
+        console.log(json);
+        createCookie(json);
       })
       .catch((err) => {
         console.error('err : ', err);

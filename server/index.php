@@ -133,11 +133,18 @@ Route::add(
     "/addCommandDetails",
     function() {
         global $api;
+        
         $id = $api->addCommand();
-        if($id && $api->addCommandDetails($id)) {
-            return $api->createToken($id);
+        if(!$api->addCommandDetails($id)) {
+            return 0;
         }
-        return 0;
+        
+        $token = $api->createToken($id);
+        if(!$token) {
+            return 0;
+        }
+
+        return json_encode($token);
     },
     "post",
 );
@@ -147,13 +154,13 @@ Route::add(
     function() {
         global $api;
         $cmdid = $api->decodeToken();
-        if($cmdid) {
-            http_response_code(200);
-            json_encode($json["cmdid"] = $cmdid);
-            return 1;   
+        if(!$cmdid) {
+            http_response_code(400);
+            return 0;
         }
-        http_response_code(400);
-        return 0;
+
+        http_response_code(200);
+        return json_encode($cmdid);
     },
     "post",
 );
@@ -166,7 +173,7 @@ Route::add(
         global $api;
         $numero = $_GET["num"];
         if($numero) {
-            $res = $api->getTable($numero);
+            $res = $api->getTable($numero); 
             if($res) {
                 http_response_code(200);
                 return $res;
@@ -242,9 +249,9 @@ Route::add(
     function() {
         global $api;
         if($api->getUserAccessLevel()) {
-            echo $api->getUserAccessLevel();
+            return $api->getUserAccessLevel();
         } else {
-            echo 0;
+            return 0;
         }
     },
     "post",
