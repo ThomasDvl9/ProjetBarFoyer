@@ -1,7 +1,11 @@
+const commandElement = document.getElementById('command');
+const totalElement = document.querySelector('#total > b');
+
 const fetchApiToJson = (method) => {
   const content = fetch('http://192.168.1.26:8080/apifoyer/' + method)
     .then((res) => res.json())
-    .then((json) => json);
+    .then((json) => json)
+    .catch((err) => null);
   return content;
 };
 
@@ -51,6 +55,32 @@ const displayCommand = async () => {
   if (detailsCommands == null) {
     return 0;
   }
+
+  let sommeTotal = 0;
+
+  detailsCommands.map(async (detailsCommand) => {
+    const produit = await fetchApiToJson('getProductById?id=' + detailsCommand.id_produit).then(
+      (res) => {
+        return res[0];
+      },
+    );
+
+    if (produit == null) {
+      return 0;
+    }
+
+    sommeTotal += Number(detailsCommand.qt_commandee) * Number(produit.prix);
+
+    const element = document.createElement('div');
+    element.innerHTML = `
+      <h3>${produit.denomination} x${detailsCommand.qt_commandee}</h3>
+      <p>Soit ${Number(detailsCommand.qt_commandee) * Number(produit.prix)} €</p>
+    `;
+
+    commandElement.appendChild(element);
+
+    totalElement.innerText = sommeTotal;
+  });
 };
 
 displayCommand();

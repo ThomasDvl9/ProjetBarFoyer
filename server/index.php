@@ -37,7 +37,10 @@ Route::add(
     function () {
         global $api;
         $id = $_GET["id"];
-        echo $api->getProductById($id);
+        if($id) {
+            return $api->getProductById($id);
+        }
+        http_response_code(400);
     },
     "get"
 );

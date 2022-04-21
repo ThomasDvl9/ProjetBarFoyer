@@ -38,13 +38,7 @@
   
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
   
-      if($result) {
-        $json = $result;
-      } else { 
-        $json = 0;
-      }
-  
-      return json_encode($json, JSON_UNESCAPED_UNICODE);
+      return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
 
     public function updateProduct() {

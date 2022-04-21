@@ -41,7 +41,6 @@ const checkTableValidation = async () => {
   }
 
   table = tab[0].id_table;
-
   h3.innerHTML = 'Vous êtes à la table ' + numero;
 };
 
