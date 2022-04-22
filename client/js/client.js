@@ -1,3 +1,5 @@
+// cookie minutes timer 33/77
+
 const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
 const totalElement = document.getElementById('total');
@@ -166,6 +168,7 @@ const verifySubmit = (arr) => {
       })
       .then((json) => {
         createCookie(json);
+        // propose redirection pour confirmation : commande.html
       })
       .catch((err) => {
         console.error('err : ', err);

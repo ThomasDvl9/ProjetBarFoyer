@@ -1,16 +1,16 @@
 const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 
+const fetchApi = (param) => {
+  return fetch('http://192.168.1.26:8080/apifoyer/' + param);
+};
+
 const fetchApiJson = (param) => {
   const content = fetch('http://192.168.1.26:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
   return content;
-};
-
-const fetchApi = (param) => {
-  return fetch('http://192.168.1.26:8080/apifoyer/' + param);
 };
 
 const fetchApiPost = (param, body) => {

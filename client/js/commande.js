@@ -1,5 +1,5 @@
 const commandElement = document.getElementById('command');
-const totalElement = document.querySelector('#total > b');
+const totalElement = document.getElementById('total');
 
 const fetchApiToJson = (method) => {
   const content = fetch('http://192.168.1.26:8080/apifoyer/' + method)
@@ -58,6 +58,8 @@ const displayCommand = async () => {
 
   let sommeTotal = 0;
 
+  totalElement.innerHTML = 'Pour un total de <b></b> €';
+
   detailsCommands.map(async (detailsCommand) => {
     const produit = await fetchApiToJson('getProductById?id=' + detailsCommand.id_produit).then(
       (res) => {
@@ -78,9 +80,10 @@ const displayCommand = async () => {
     `;
 
     commandElement.appendChild(element);
-
-    totalElement.innerText = sommeTotal;
+    totalElement.querySelector('b').innerText = sommeTotal;
   });
+
+  alert('Votre commande à été confirmer !');
 };
 
 displayCommand();

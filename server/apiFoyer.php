@@ -41,6 +41,24 @@
       return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
 
+    public function getProductsFromCommandId($cmdid) {
+      $objPDOStatement = $this->PDO->query("SELECT id_produit FROM detail_commandes WHERE id_commande = $cmdid");
+  
+      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+
+      $productsTab = array();
+
+      foreach($result as $id) {
+        $pid = $id["id_produit"];
+        $productQuery = $this->PDO->query("SELECT * FROM produits WHERE id_produit = $pid");
+        $product = $productQuery->fetchAll(PDO::FETCH_ASSOC);
+
+        array_push($productsTab, $product);
+      }
+  
+      return json_encode($productsTab ? $productsTab : null, JSON_UNESCAPED_UNICODE);
+    }
+
     public function updateProduct() {
       $data = json_decode(file_get_contents('php://input'));
 
@@ -77,7 +95,17 @@
       } else {
         http_response_code(400);
       }
-    }  
+    }
+
+    public function commandProduct($id, $qt) {
+      $query = $this->PDO->exec("UPDATE produits SET qt_dispo = qt_dispo - $qt WHERE id_produit = $id");
+      if($query) {
+        http_response_code(200);
+        return 1;
+      }
+      http_response_code(400);
+      return 0;
+    }
 
     public function deleteProduct($product) {
       return $this->PDO->exec("DELETE FROM produits WHERE id_produit = $product");
@@ -126,6 +154,16 @@
       http_response_code(400);
       return 0;
     }
+
+    public function confirmCommand($id) {
+      $query = $this->PDO->query("UPDATE commandes SET confirmee = '1' WHERE id_commande = $id");
+      if($query) {
+        http_response_code(200);
+        return 1;
+      }
+      http_response_code(400);
+      return 0;
+    } 
 
     // DETAIL COMMANDES
 
@@ -285,7 +323,7 @@
       return $token;
     }
     
-    public function decodeToken() {   
+    public function decodeToken() {
       $data = json_decode(file_get_contents('php://input'));  
 
       if(!$data->token) {
@@ -313,7 +351,15 @@
         return false;
       }
 
-      $cmdid = substr($content, 0, $split);       
+      $cmdid = substr($content, 0, $split);
+      
+      $confirmQuery = $this->confirmCommand($cmdid);
+
+      if(!$confirmQuery) {
+        return 0;
+      }
+
+      // $this->commandProduct();      
       
       return $cmdid;
     }  

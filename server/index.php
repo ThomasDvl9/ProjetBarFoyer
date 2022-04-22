@@ -46,6 +46,19 @@ Route::add(
 );
 
 Route::add(
+    "/getProductsFromCommandId",
+    function () {
+        global $api;
+        $id = $_GET["id"];
+        if($id) {
+            return $api->getProductsFromCommandId($id);
+        }
+        http_response_code(400);
+    },
+    "get"
+);
+
+Route::add(
     "/updateProduct",
     function () {
         global $api;
