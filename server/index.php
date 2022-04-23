@@ -127,6 +127,18 @@ Route::add(
     "get"
 );
 
+Route::add(
+    "/getAllDetailsCommand",
+    function () {
+        global $api;
+        $id = $_GET["id"];
+        if($id) {
+            return $api->getAllDetailsCommand($id);
+        }
+    },
+    "get"
+);
+
 // DETAIL_COMMANDES
 
 Route::add(

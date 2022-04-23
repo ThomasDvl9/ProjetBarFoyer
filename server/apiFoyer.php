@@ -135,6 +135,33 @@
       return json_encode($json, JSON_UNESCAPED_UNICODE);
     }
 
+    public function getAllDetailsCommand($cmdid) {
+      $commande = $this->PDO->query("SELECT * FROM commandes WHERE id_commande = $cmdid")
+      ->fetchAll(PDO::FETCH_ASSOC);
+
+      $tableid = $commande[0]["id_table"];
+
+      $table = $this->PDO->query("SELECT numero FROM tables WHERE id_table = $tableid")
+      ->fetchAll(PDO::FETCH_ASSOC);
+
+      $commandeDetails = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $cmdid")
+      ->fetchAll(PDO::FETCH_ASSOC);
+
+      $produits = array();
+
+      foreach ($commandeDetails as $commandeDetail) {
+        $commandDetailId = $commandeDetail["id_produit"];
+        $produit = $this->PDO->query("SELECT * FROM produits WHERE id_produit = $commandDetailId")
+        ->fetchAll(PDO::FETCH_ASSOC);
+        array_push($produits, $produit);
+      }
+
+      $result = array();
+      array_push($result, $commande, $table, $commandeDetails, $produits);
+      
+      return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
+    }
+
     public function addCommand() {
       $data = json_decode(file_get_contents('php://input'));
 
