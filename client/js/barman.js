@@ -14,16 +14,16 @@ const fetchApiToJson = (param) => {
   return produits;
 };
 
-let refresh = setInterval(() => {
-  commandesTemplate();
-}, 5000);
+// let refresh = setInterval(() => {
+//   commandesTemplate();
+// }, 5000);
 
-document.addEventListener('mousemove', (e) => {
-  clearInterval(refresh);
-  refresh = setInterval(() => {
-    commandesTemplate();
-  }, 5000);
-});
+// document.addEventListener('mousemove', (e) => {
+//   clearInterval(refresh);
+//   refresh = setInterval(() => {
+//     commandesTemplate();
+//   }, 5000);
+// });
 
 const commandesTemplate = async () => {
   const commandesDispo = await fetchApiToJson('getPendingOrders');
@@ -76,6 +76,9 @@ const commandesTemplate = async () => {
           commandDetail.qt_commandee +
           '</h3>' +
           `<input type="checkbox" ${Number(commandDetail.cochee) ? 'disabled checked' : ''} />`;
+
+        console.log(contactElement);
+        console.log(produitElement);
 
         article.append(contactElement, produitElement);
       });

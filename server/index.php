@@ -121,7 +121,7 @@ Route::add(
         global $api;
         $id = $_GET["id"];
         if($id) {
-            return$api->getCommandById($id);
+            return $api->getCommandById($id);
         } 
     },
     "get"

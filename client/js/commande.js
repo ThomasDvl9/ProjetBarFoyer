@@ -1,5 +1,6 @@
 const commandElement = document.getElementById('command');
 const totalElement = document.getElementById('total');
+const produitsList = {};
 
 const fetchApiToJson = (method) => {
   const content = fetch('http://192.168.1.26:8080/apifoyer/' + method)
@@ -61,22 +62,27 @@ const displayCommand = async () => {
   totalElement.innerHTML = 'Pour un total de <b></b> €';
 
   detailsCommands.map(async (detailsCommand) => {
-    const produit = await fetchApiToJson('getProductById?id=' + detailsCommand.id_produit).then(
-      (res) => {
-        return res[0];
-      },
-    );
+    if (!produitsList[detailsCommand.id_produit]) {
+      const produit = await fetchApiToJson('getProductById?id=' + detailsCommand.id_produit);
 
-    if (produit == null) {
+      produitsList[detailsCommand.id_produit] = await produit[0];
+    }
+
+    if (produitsList[detailsCommand.id_produit] == null) {
       return 0;
     }
 
-    sommeTotal += Number(detailsCommand.qt_commandee) * Number(produit.prix);
+    sommeTotal +=
+      Number(detailsCommand.qt_commandee) * Number(produitsList[detailsCommand.id_produit].prix);
 
     const element = document.createElement('div');
     element.innerHTML = `
-      <h3>${produit.denomination} x${detailsCommand.qt_commandee}</h3>
-      <p>Soit ${Number(detailsCommand.qt_commandee) * Number(produit.prix)} €</p>
+      <h3>${produitsList[detailsCommand.id_produit].denomination} x${
+      detailsCommand.qt_commandee
+    }</h3>
+      <p>Soit ${
+        Number(detailsCommand.qt_commandee) * Number(produitsList[detailsCommand.id_produit].prix)
+      } €</p>
     `;
 
     commandElement.appendChild(element);
