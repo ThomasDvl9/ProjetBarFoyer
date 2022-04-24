@@ -36,7 +36,12 @@ const produitsTemplate = async () => {
     article.setAttribute('produit-id', produit.id_produit);
 
     const datePeremption = produit.peremption.split('-');
-    const dateProduit = new Date(datePeremption[0], datePeremption[1], datePeremption[2]).getTime();
+
+    const dateProduit = new Date(
+      datePeremption[0],
+      Number(datePeremption[1]) - 1,
+      datePeremption[2],
+    ).getTime();
     if (Date.now() > dateProduit) {
       article.className = 'red';
       article.innerHTML = '<h4>Produit périmé</h4>';
@@ -107,7 +112,7 @@ const produitsTemplate = async () => {
       const datePeremption = peremptionInp.value.split('-');
       const dateProduit = new Date(
         datePeremption[0],
-        datePeremption[1],
+        Number(datePeremption[1]) - 1,
         datePeremption[2],
       ).getTime();
       if (Date.now() < dateProduit) {

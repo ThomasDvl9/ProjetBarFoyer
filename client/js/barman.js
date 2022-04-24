@@ -26,72 +26,54 @@ const fetchApiToJson = (param) => {
 // });
 
 const commandesTemplate = async () => {
-  const commandesDispo = await fetchApiToJson('getPendingOrders');
+  const commandes = await fetchApiToJson('getAllDetailsCommandForCheckedCommand');
 
-  if (commandesDispo === null && commandesDispo == 0) {
+  if (commandes === null) {
     return 0;
   }
 
-  await commandesDispo
-    .filter((commande) => {
-      return Number(commande.confirmee);
-    })
-    .map(async (commande) => {
-      const article = document.createElement('article');
-      const contactElement = document.createElement('a');
+  const commandeTemplate = commandes[0].map((commande, index) => {
+    const article = document.createElement('article');
+    const contactElement = document.createElement('a');
 
-      if (!tablesList[commande.id_table]) {
-        const table = await fetchApiToJson('getTable?num=' + commande.id_table);
-        tablesList[commande.id_table] = await table[0].numero;
-      }
+    contactElement.className = 'contact';
+    contactElement.href = 'mailto:' + commande.email;
+    contactElement.innerHTML = '<i class="fa-regular fa-envelope"></i>';
 
-      contactElement.className = 'contact';
-      contactElement.href = 'mailto:' + commande.email;
-      contactElement.innerHTML = '<i class="fa-regular fa-envelope"></i>';
+    const numTable = commandes[1][index];
+    article.innerHTML = '<h4>Table ' + numTable + '</h4>';
 
-      article.innerHTML =
-        '<h3>Id ' +
-        commande.id_commande +
-        '</h3><h3>Table ' +
-        tablesList[commande.id_table] +
-        '</h3>';
+    const produitsElement = document.createElement('div');
+    produitsElement.className = 'products-list';
 
-      const commandDetails = await fetchApiToJson(
-        'getCommandDetailByCommandId?id=' + commande.id_commande,
-      );
-
-      await commandDetails.map(async (commandDetail) => {
-        if (!produitsList[commandDetail.id_produit]) {
-          const produit = await fetchApiToJson('getProductById?id=' + commandDetail.id_produit);
-
-          produitsList[commandDetail.id_produit] = await produit[0];
-        }
-
-        const produitElement = document.createElement('div');
-
-        produitElement.innerHTML =
-          '<h3>' +
-          produitsList[commandDetail.id_produit].denomination +
-          ' x' +
-          commandDetail.qt_commandee +
-          '</h3>' +
-          `<input type="checkbox" ${Number(commandDetail.cochee) ? 'disabled checked' : ''} />`;
-
-        console.log(contactElement);
-        console.log(produitElement);
-
-        article.append(contactElement, produitElement);
+    commandes[2][index].map((detailsCommande) => {
+      const produit = commandes[3].find(({ id_produit }) => {
+        return id_produit === detailsCommande.id_produit;
       });
 
-      sectionElement.appendChild(article);
+      produitsElement.innerHTML += `<h4>${produit.denomination} x${
+        detailsCommande.qt_commandee
+      }</h4><input d-cmd="${detailsCommande.id_detail}" type="checkbox" ${
+        Number(detailsCommande.cochee) ? 'disabled checked' : ''
+      } />`;
     });
 
+    const distribuerElement = document.createElement('a');
+    distribuerElement.setAttribute('cmd', commande.id_commande);
+    distribuerElement.classList = 'btn btn-validate btn-container';
+    distribuerElement.innerText = 'Distribuer';
+
+    article.append(contactElement, produitsElement, distribuerElement);
+    return article;
+  });
+
   sectionElement.innerHTML = '';
+  sectionElement.append(...commandeTemplate);
 
   const inputElement = document.querySelectorAll('input');
   inputElement.forEach((input) => {
-    input.addEventListener('change', () => {
-      console.log('Input change');
+    input.addEventListener('change', (e) => {
+      console.log(e.target.getAttribute('d-cmd'));
     });
   });
 };

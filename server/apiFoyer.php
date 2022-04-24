@@ -135,29 +135,30 @@
       return json_encode($json, JSON_UNESCAPED_UNICODE);
     }
 
-    public function getAllDetailsCommand($cmdid) {
-      $commande = $this->PDO->query("SELECT * FROM commandes WHERE id_commande = $cmdid")
+    public function getAllDetailsCommandForCheckedCommand() {
+      $commandes = $this->PDO->query("SELECT * FROM commandes WHERE confirmee = 1 AND preparee = 0")
       ->fetchAll(PDO::FETCH_ASSOC);
 
-      $tableid = $commande[0]["id_table"];
+      $tables = array();
+      $commandesDetails = array();
 
-      $table = $this->PDO->query("SELECT numero FROM tables WHERE id_table = $tableid")
-      ->fetchAll(PDO::FETCH_ASSOC);
-
-      $commandeDetails = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $cmdid")
-      ->fetchAll(PDO::FETCH_ASSOC);
-
-      $produits = array();
-
-      foreach ($commandeDetails as $commandeDetail) {
-        $commandDetailId = $commandeDetail["id_produit"];
-        $produit = $this->PDO->query("SELECT * FROM produits WHERE id_produit = $commandDetailId")
+      foreach ($commandes as $commande) {
+        $tableid = $commande["id_table"];
+        $table = $this->PDO->query("SELECT numero FROM tables WHERE id_table = $tableid")
         ->fetchAll(PDO::FETCH_ASSOC);
-        array_push($produits, $produit);
+        array_push($tables, $table[0]["numero"]);
+        
+        $cmdid = $commande["id_commande"];
+        $commandeDetails = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $cmdid")
+        ->fetchAll(PDO::FETCH_ASSOC);
+        array_push($commandesDetails, $commandeDetails);
       }
+      
+      $produits = $this->PDO->query("SELECT * FROM produits")
+      ->fetchAll(PDO::FETCH_ASSOC);
 
       $result = array();
-      array_push($result, $commande, $table, $commandeDetails, $produits);
+      array_push($result, $commandes, $tables, $commandesDetails, $produits);
       
       return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }

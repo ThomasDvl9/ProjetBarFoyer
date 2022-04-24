@@ -128,13 +128,10 @@ Route::add(
 );
 
 Route::add(
-    "/getAllDetailsCommand",
+    "/getAllDetailsCommandForCheckedCommand",
     function () {
         global $api;
-        $id = $_GET["id"];
-        if($id) {
-            return $api->getAllDetailsCommand($id);
-        }
+        return $api->getAllDetailsCommandForCheckedCommand();
     },
     "get"
 );
