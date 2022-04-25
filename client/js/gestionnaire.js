@@ -24,25 +24,66 @@ const fetchApiPost = (param, body) => {
   return content;
 };
 
-const modal = (message, state, id) => {
+const modal = ({ message, state, action, method, id, datas = null }) => {
+  const deleteElement = (e) => {
+    e.stopPropagation();
+
+    modalElement.remove();
+    document.body.classList.remove('rel');
+  };
+
   const modalElement = document.createElement('div');
   modalElement.classList = 'modal ' + state;
-  document.body.className = 'rel';
+  document.body.classList.add('rel');
 
   const settingElement = document.createElement('div');
   settingElement.className = 'setting';
+  settingElement.innerHTML = `<h3>${message}</h3>`;
 
-  settingElement.innerHTML = `
-  <h3>${message}</h3>
-      <a class="btn btn-container btn-validate">Annuler</a>
-      <a class="btn btn-container btn-delete">Confirmer</a>`;
+  const btnCancel = document.createElement('a');
+  btnCancel.classList = 'btn btn-container btn-validate';
+  btnCancel.innerHTML = 'Annuler';
 
+  btnCancel.addEventListener('click', (e) => {
+    deleteElement(e);
+    console.log('Cancel');
+  });
+
+  const btnConfirm = document.createElement('a');
+  btnConfirm.classList = 'btn btn-container btn-delete';
+  btnConfirm.innerText = 'Confirmer';
+
+  btnConfirm.addEventListener('click', (e) => {
+    console.log('Confirm');
+    if (action == "get") {
+      await fetchApi(method + '?product=' + id)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json === 'already in command') {
+            alert('Ce produit appartient à une commande');
+          } else {
+            throw 'send';
+          }
+        })
+        .catch((err) => produitsTemplate());
+    } else if(action == "post" && datas != null) {
+      await fetchApiPost(method, datas)
+        .then((res) => {
+          res.status;
+        })
+        .then(() => {
+          produitsTemplate();
+        })
+        .catch((err) => console.error(err));
+    }
+  });
+
+  settingElement.append(btnCancel, btnConfirm);
   modalElement.appendChild(settingElement);
 
   modalElement.addEventListener('click', (e) => {
-    e.stopPropagation();
     if (e.target.classList[0] == 'modal') {
-      modalElement.remove();
+      deleteElement(e);
     }
   });
 
@@ -50,7 +91,16 @@ const modal = (message, state, id) => {
 };
 
 const produitsTemplate = async () => {
-  const produitsDispo = await fetchApiJson('getAvailableProducts');
+  const produitsDispo = [
+    {
+      id_produit: 1,
+      denomination: 'test',
+      prix: 1,
+      qt_dispo: 100,
+      peremption: '2022-10-10',
+      illustration: null,
+    },
+  ];
 
   if (produitsDispo === null && Number(produitsDispo.produitsDispo) === 0) {
     return null;
@@ -141,7 +191,21 @@ const produitsTemplate = async () => {
         datePeremption[2],
       ).getTime();
       if (Date.now() < dateProduit) {
-        await fetchApiPost('updateProduct', {
+        modal({
+          message: 'Modification de : ' + produitsDispo[index].denomination,
+          state: '',
+          action: 'post',
+          method: 'updateProduct',
+          id,
+          datas: {
+            id: e.target.getAttribute('produit-id'),
+            nom: denominationInp.value,
+            prix: prixInp.value,
+            quantite: quantiteInp.value,
+            peremption: peremptionInp.value,
+            illustration: illustrationInp.value,
+        }})
+       /*  await fetchApiPost('updateProduct', {
           id: e.target.getAttribute('produit-id'),
           nom: denominationInp.value,
           prix: prixInp.value,
@@ -155,7 +219,7 @@ const produitsTemplate = async () => {
           .then(() => {
             produitsTemplate();
           })
-          .catch((err) => console.error(err));
+          .catch((err) => console.error(err)); */
       } else {
         alert('Date de péremption non valide !');
       }
@@ -163,7 +227,13 @@ const produitsTemplate = async () => {
 
     deleteBtnProduit[index].addEventListener('click', async (e) => {
       const id = e.target.getAttribute('produit-id');
-      modal('Suppression du produit', 'red', id);
+      modal({
+        message: 'Suppression du produit : ' + produitsDispo[index].denomination,
+        state: 'red',
+        action: 'get',
+        method: 'deleteProduct',
+        id,
+      });
       /* await fetchApi('deleteProduct' + '?product=' + id)
         .then((res) => res.json())
         .then((json) => {
