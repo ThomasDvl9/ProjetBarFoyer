@@ -1,14 +1,16 @@
 <?php
 
+use LDAP\Result;
+
 require_once "./Route.php";
 // include "/home/profsir/yanngouville/public_html/MiniProjetFoyer/API_Foyer.php";
 include "./apiFoyer.php";
 header("Access-Control-Allow-Origin: *");
 
-$user = "paul";
-$mdp = "Password123!";
+$user = "groupe6";
+$mdp = "Password1234g6";
 $host = "localhost";
-$base = "foyerbdd";
+$base = "foyerbdd_g6";
 $api = new API_Foyer($base, $user, $mdp, $host);
 
 // ensemble des methodes GET
@@ -280,10 +282,11 @@ Route::add(
     "/getUserAccessLevel",
     function() {
         global $api;
-        if($api->getUserAccessLevel()) {
-            return $api->getUserAccessLevel();
+        $result = $api->getUserAccessLevel();
+        if($result) {
+            return $result;
         } else {
-            return 0;
+            return null;
         }
     },
     "post",
@@ -362,6 +365,6 @@ Route::methodNotAllowed(function () {
     echo "Cette méthode n'existe pas";
 });
 
-Route::run("/apifoyer");
+Route::run("/~paulhelleu/MiniProjet/index.php");
 
 ?>

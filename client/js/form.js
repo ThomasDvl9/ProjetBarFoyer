@@ -1,9 +1,9 @@
 document.querySelector('form').addEventListener('submit', (e) => {
   e.preventDefault();
-  const emailInp = document.querySelector('input[type="email"]');
+  const idInp = document.querySelector('input[name="identifiant"]');
   const passwordInp = document.querySelector('input[type="password"]');
 
-  console.log({ email: emailInp.value, password: passwordInp.value });
+  console.log({ email: idInp.value, password: passwordInp.value });
 
   // const body = JSON.stringify({ email: emailInp.value, password: passwordInp.value });
 

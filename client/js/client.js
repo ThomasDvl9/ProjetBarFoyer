@@ -10,7 +10,7 @@ const url = new URL(location);
 let table = null;
 
 const fetchApiToJson = (method) => {
-  const content = fetch('http://192.168.1.26:8080/apifoyer/' + method)
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -18,7 +18,7 @@ const fetchApiToJson = (method) => {
 };
 
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://192.168.1.26:8080/apifoyer/' + method, {
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -39,7 +39,7 @@ const checkTableValidation = async () => {
   // condition si table n'existe pas
   const tab = await fetchApiToJson('getTable?num=' + numero);
   if (!(tab && tab.length)) {
-    location.href = 'http://192.168.1.26:5500/client/pages';
+    location.href = 'http://172.16.40.94:5500/client/pages';
   }
 
   table = tab[0].id_table;

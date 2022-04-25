@@ -3,27 +3,27 @@ const produitsList = {};
 const tablesList = {};
 
 const fetchApi = (param) => {
-  return fetch('http://192.168.1.26:8080/apifoyer/' + param);
+  return fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param);
 };
 
 const fetchApiToJson = (param) => {
-  const produits = fetch('http://192.168.1.26:8080/apifoyer/' + param)
+  const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
   return produits;
 };
 
-// let refresh = setInterval(() => {
-//   commandesTemplate();
-// }, 5000);
+let refresh = setInterval(() => {
+  commandesTemplate();
+}, 5000);
 
-// document.addEventListener('mousemove', (e) => {
-//   clearInterval(refresh);
-//   refresh = setInterval(() => {
-//     commandesTemplate();
-//   }, 5000);
-// });
+document.addEventListener('mousemove', (e) => {
+  clearInterval(refresh);
+  refresh = setInterval(() => {
+    commandesTemplate();
+  }, 5000);
+});
 
 const commandesTemplate = async () => {
   const commandes = await fetchApiToJson('getAllDetailsCommandForCheckedCommand');

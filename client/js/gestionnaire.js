@@ -2,11 +2,11 @@ const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 
 const fetchApi = (param) => {
-  return fetch('http://192.168.1.26:8080/apifoyer/' + param);
+  return fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param);
 };
 
 const fetchApiJson = (param) => {
-  const content = fetch('http://192.168.1.26:8080/apifoyer/' + param)
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -14,7 +14,7 @@ const fetchApiJson = (param) => {
 };
 
 const fetchApiPost = (param, body) => {
-  const content = fetch('http://192.168.1.26:8080/apifoyer/' + param, {
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -22,6 +22,31 @@ const fetchApiPost = (param, body) => {
     body: JSON.stringify(body),
   });
   return content;
+};
+
+const modal = (message, state, id) => {
+  const modalElement = document.createElement('div');
+  modalElement.classList = 'modal ' + state;
+  document.body.className = 'rel';
+
+  const settingElement = document.createElement('div');
+  settingElement.className = 'setting';
+
+  settingElement.innerHTML = `
+  <h3>${message}</h3>
+      <a class="btn btn-container btn-validate">Annuler</a>
+      <a class="btn btn-container btn-delete">Confirmer</a>`;
+
+  modalElement.appendChild(settingElement);
+
+  modalElement.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (e.target.classList[0] == 'modal') {
+      modalElement.remove();
+    }
+  });
+
+  document.body.appendChild(modalElement);
 };
 
 const produitsTemplate = async () => {
@@ -138,7 +163,8 @@ const produitsTemplate = async () => {
 
     deleteBtnProduit[index].addEventListener('click', async (e) => {
       const id = e.target.getAttribute('produit-id');
-      await fetchApi('deleteProduct' + '?product=' + id)
+      modal('Suppression du produit', 'red', id);
+      /* await fetchApi('deleteProduct' + '?product=' + id)
         .then((res) => res.json())
         .then((json) => {
           if (json === 'already in command') {
@@ -147,7 +173,7 @@ const produitsTemplate = async () => {
             throw 'send';
           }
         })
-        .catch((err) => produitsTemplate());
+        .catch((err) => produitsTemplate()); */
     });
   });
 };

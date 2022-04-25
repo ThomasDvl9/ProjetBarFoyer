@@ -312,25 +312,39 @@
       return $this->PDO->query("DELETE FROM tables WHERE id_table = $table");     
     }
 
-    // AUTH
+    // Authentification
+
+    public function authentificationUser () {
+      $data = json_decode(file_get_contents('php://input'));
+      
+      $id = $data->id;
+      $password = strtoupper(md5($data->password));
+
+      if($id && $password) {
+        $objPDOStatement = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id' AND _password = '$password'");
+
+        $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+
+        return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
+      }
+      
+      return 0;
+    }
 
     public function getUserAccessLevel() {
       $data = json_decode(file_get_contents('php://input'));
       
-      $role = $data->role;
-      $password = strtoupper(md5($data->password));
+      $uid = $data->uid;
 
-      if($role && $password) {
-        $objPDOStatement = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$role' AND _password = '$password'");
+      if($uid) {
+        $objPDOStatement = $this->PDO->query("SELECT accessLevel FROM users WHERE id_user = '$uid'");
 
         $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
-        
-        if($result) {
-          return json_encode($result, JSON_UNESCAPED_UNICODE);
-        }
+  
+        return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
       }
-      
-      return 0;
+
+      return null;      
     }
 
     public function createToken($cmdid) {

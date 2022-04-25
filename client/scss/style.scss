@@ -44,6 +44,27 @@ input {
   border-radius: 0.3rem;
 }
 
+.rel {
+  position: relative;
+}
+
+.modal {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(50, 50, 50, 0.7);
+
+  > .setting {
+    padding: 5rem;
+    background: #eee;
+  }
+}
+
 .input-group {
   margin: 1.5rem 0;
   display: flex;

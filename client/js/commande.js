@@ -3,7 +3,7 @@ const totalElement = document.getElementById('total');
 const produitsList = {};
 
 const fetchApiToJson = (method) => {
-  const content = fetch('http://192.168.1.26:8080/apifoyer/' + method)
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch((err) => null);
@@ -11,7 +11,7 @@ const fetchApiToJson = (method) => {
 };
 
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://192.168.1.26:8080/apifoyer/' + method, {
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
