@@ -24,7 +24,7 @@ const fetchApiPost = (param, body) => {
   return content;
 };
 
-const modal = ({ message, state, action, method, id, datas = null }) => {
+const modal = ({ message, state, method, id = null, datas = null }, cb) => {
   const deleteElement = (e) => {
     e.stopPropagation();
 
@@ -53,27 +53,33 @@ const modal = ({ message, state, action, method, id, datas = null }) => {
   btnConfirm.classList = 'btn btn-container btn-delete';
   btnConfirm.innerText = 'Confirmer';
 
-  btnConfirm.addEventListener('click', (e) => {
+  btnConfirm.addEventListener('click', async (e) => {
     console.log('Confirm');
-    if (action == "get") {
-      await fetchApi(method + '?product=' + id)
+    console.log(cb);
+    if (datas != null) {
+      console.log('post');
+
+      await cb(method, datas)
+        .then((res) => {
+          if (res.status == 200) {
+            produitsTemplate();
+          } else {
+            throw 'error db';
+          }
+        })
+        .catch((err) => console.error(err));
+    } else {
+      console.log('get');
+
+      await cb(method + id)
         .then((res) => res.json())
         .then((json) => {
           if (json === 'already in command') {
             alert('Ce produit appartient à une commande');
-          } else {
-            throw 'send';
+            throw 'error';
           }
         })
-        .catch((err) => produitsTemplate());
-    } else if(action == "post" && datas != null) {
-      await fetchApiPost(method, datas)
-        .then((res) => {
-          res.status;
-        })
-        .then(() => {
-          produitsTemplate();
-        })
+        .then((c) => produitsTemplate())
         .catch((err) => console.error(err));
     }
   });
@@ -196,7 +202,6 @@ const produitsTemplate = async () => {
           state: '',
           action: 'post',
           method: 'updateProduct',
-          id,
           datas: {
             id: e.target.getAttribute('produit-id'),
             nom: denominationInp.value,
@@ -204,8 +209,10 @@ const produitsTemplate = async () => {
             quantite: quantiteInp.value,
             peremption: peremptionInp.value,
             illustration: illustrationInp.value,
-        }})
-       /*  await fetchApiPost('updateProduct', {
+          },
+          fetchApiPost,
+        });
+        /*  await fetchApiPost('updateProduct', {
           id: e.target.getAttribute('produit-id'),
           nom: denominationInp.value,
           prix: prixInp.value,
@@ -227,13 +234,16 @@ const produitsTemplate = async () => {
 
     deleteBtnProduit[index].addEventListener('click', async (e) => {
       const id = e.target.getAttribute('produit-id');
-      modal({
-        message: 'Suppression du produit : ' + produitsDispo[index].denomination,
-        state: 'red',
-        action: 'get',
-        method: 'deleteProduct',
-        id,
-      });
+      modal(
+        {
+          message: 'Suppression du produit : ' + produitsDispo[index].denomination,
+          state: 'red',
+          action: 'get',
+          method: 'deleteProduct?product=',
+          id,
+        },
+        fetchApi,
+      );
       /* await fetchApi('deleteProduct' + '?product=' + id)
         .then((res) => res.json())
         .then((json) => {
