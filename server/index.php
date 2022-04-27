@@ -173,7 +173,8 @@ Route::add(
             return 0;
         }
         
-        $token = $api->createToken($id);
+        $token = $api->commandToken($id);
+
         if(!$token) {
             return 0;
         }

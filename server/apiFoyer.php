@@ -1,6 +1,7 @@
 <?php
 
-  define("MINUTES", 15);
+  define("MINUTES_CMD", 15);
+  define("MINUTES_AUTH", 90);
 
   class API_Foyer {
   
@@ -100,19 +101,35 @@
     public function commandProductFromCommand($cmdid) {
       $commandeDetails = $this->PDO->query("SELECT id_produit, qt_commandee FROM detail_commandes WHERE id_commande = $cmdid")->fetchAll(PDO::FETCH_ASSOC);
 
-      if($commandeDetails) {
-        foreach ($commandeDetails as $commandeDetail) {
-          $pid = $commandeDetail["id_produit"];
-          $qt = $commandeDetail["qt_commandee"];
-          $this->PDO->exec("UPDATE produits SET qt_dispo = qt_dispo - $qt WHERE id_produit = $pid");
-        }
-  
-        http_response_code(200);
-        return 1;
+      if(!$commandeDetails) {
+        http_response_code(400);
+        return 0;
       }
 
-      http_response_code(400);
-      return 0;
+      foreach ($commandeDetails as $commandeDetail) {
+        $pid = $commandeDetail["id_produit"];
+        $qt = $commandeDetail["qt_commandee"];
+        $qtProduit = $this->PDO->query("SELECT qt_dispo FROM produits WHERE id_produit = $pid")->fetchAll(PDO::FETCH_ASSOC);
+
+        if(!$qtProduit) {
+          http_response_code(400);
+          return 0;
+        }
+
+        if((int) $qt > (int) $qtProduit[0]["qt_dispo"]) {
+          http_response_code(401);
+          return 0;
+        }
+      }
+
+      foreach ($commandeDetails as $commandeDetail) {
+        $pid = $commandeDetail["id_produit"];
+        $qt = $commandeDetail["qt_commandee"];
+        $this->PDO->exec("UPDATE produits SET qt_dispo = qt_dispo - $qt WHERE id_produit = $pid");
+      }
+
+      http_response_code(200);
+      return 1;      
     }
 
     public function deleteProduct($product) {
@@ -324,14 +341,13 @@
 
     public function authentificationUser () {
       $data = json_decode(file_get_contents('php://input'));
-      
+
       $id = $data->id;
       $password = strtoupper(md5($data->password));
 
       if($id && $password) {
-        $objPDOStatement = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id' AND _password = '$password'");
-
-        $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+        $result = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id' AND _password = '$password'")
+        ->fetchAll(PDO::FETCH_ASSOC);
 
         return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
       }
@@ -345,9 +361,8 @@
       $uid = $data->uid;
 
       if($uid) {
-        $objPDOStatement = $this->PDO->query("SELECT accessLevel FROM users WHERE id_user = '$uid'");
-
-        $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+        $result = $this->PDO->query("SELECT accessLevel FROM users WHERE id_user = '$uid'")
+        ->fetchAll(PDO::FETCH_ASSOC);
   
         return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
       }
@@ -355,10 +370,8 @@
       return null;      
     }
 
-    public function createToken($cmdid) {
-      $validity_timer = time() + 60 * MINUTES;
-
-      $content = $cmdid . "." . $validity_timer;
+    public function createToken($id, $validity_timer) {
+      $content = $id . "." . $validity_timer;
       
       $encrypt_method = "AES-256-CBC";
       $key = '08086b54-ca82-4804-8e9a-fe83f796c558';
@@ -371,6 +384,22 @@
       }
       
       return $token;
+    }
+
+    public function commandToken($cmdid) {
+      $command = $this->commandProductFromCommand($cmdid);
+      $validity_timer = time() + 60 * MINUTES_CMD;
+
+      if(!$command) {
+        return 0;
+      }
+
+      return $this->createToken($cmdid, $validity_timer);
+    }
+
+    public function userToken() {
+      $accessLevel =  $this->authentificationUser();
+      $validity_timer = time() + 60 * MINUTES_AUTH;
     }
     
     public function decodeToken() {
@@ -406,12 +435,6 @@
       $confirmQuery = $this->confirmCommand($cmdid);
 
       if(!$confirmQuery) {
-        return 0;
-      }
-
-      $update = $this->commandProductFromCommand($cmdid);      
-
-      if(!$update) {
         return 0;
       }
       

@@ -5,6 +5,7 @@ const h3 = document.querySelector('h3');
 const totalElement = document.getElementById('total');
 const statusElement = document.getElementById('status');
 let quantiteInp = null;
+const qt = [];
 
 const url = new URL(location);
 let table = null;
@@ -129,6 +130,12 @@ const produitsTemplate = async () => {
         }" alt="icon" />
       </div>`;
 
+    () => {
+      return '3f8b5ae5a72bddc41ee71186057aca5957ee9fb35c0f6ff9d4008aef78ed5125';
+    };
+
+    qt.push(produit.qt_dispo);
+
     return article;
   });
 
@@ -152,6 +159,16 @@ const totalFeature = (arr) => {
           alert('Valeur non valide !');
           inp.value = Math.round(Number(inp.value));
         }
+
+        if (value.match(new RegExp(/\d/g)) == null) {
+          alert('Valeur non valide !');
+          inp.value = 0;
+        }
+
+        if (Number(value) > Number(qt[index])) {
+          inp.value = qt[index];
+        }
+
         sum += Number(inp.value) * Number(arr[index].prix);
       });
 
@@ -202,10 +219,22 @@ const verifySubmit = (arr) => {
       email,
     })
       .then((res) => {
-        if (!res.status == 200) {
-          statusElement.innerText = 'Données envoyés non valides !';
+        if (res.status == 200) {
+          return res.json();
         }
-        return res.json();
+
+        if (res.status == 401) {
+          statusElement.innerText =
+            "Trop tard quelqu'un viens de commander un produit que vous avez choisi !";
+          produitsTemplate();
+          throw 'error db';
+        }
+
+        if (res.status == 400) {
+          statusElement.innerText = 'Données envoyés non valides !';
+          produitsTemplate();
+          throw 'error db';
+        }
       })
       .then((json) => {
         createCookie(json);

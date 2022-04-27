@@ -86,7 +86,7 @@ const displayCommand = async () => {
     `;
 
     commandElement.appendChild(element);
-    totalElement.querySelector('b').innerText = sommeTotal;
+    totalElement.querySelector('b').innerText = Math.round(sommeTotal * 100) / 100;
   });
 
   alert('Votre commande à été confirmer !');
