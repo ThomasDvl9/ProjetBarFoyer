@@ -25,9 +25,7 @@ const fetchApiPost = (param, body) => {
 };
 
 const modal = ({ message, state, method, id = null, datas = null }, cb) => {
-  const deleteElement = (e) => {
-    e.stopPropagation();
-
+  const deleteElement = () => {
     modalElement.remove();
     document.body.classList.remove('rel');
   };
@@ -45,7 +43,7 @@ const modal = ({ message, state, method, id = null, datas = null }, cb) => {
   btnCancel.innerHTML = 'Annuler';
 
   btnCancel.addEventListener('click', (e) => {
-    deleteElement(e);
+    deleteElement();
     console.log('Cancel');
   });
 
@@ -55,10 +53,7 @@ const modal = ({ message, state, method, id = null, datas = null }, cb) => {
 
   btnConfirm.addEventListener('click', async (e) => {
     console.log('Confirm');
-    console.log(cb);
     if (datas != null) {
-      console.log('post');
-
       await cb(method, datas)
         .then((res) => {
           if (res.status == 200) {
@@ -68,9 +63,7 @@ const modal = ({ message, state, method, id = null, datas = null }, cb) => {
           }
         })
         .catch((err) => console.error(err));
-    } else {
-      console.log('get');
-
+    } else if (id != 0) {
       await cb(method + id)
         .then((res) => res.json())
         .then((json) => {
@@ -82,6 +75,7 @@ const modal = ({ message, state, method, id = null, datas = null }, cb) => {
         .then((c) => produitsTemplate())
         .catch((err) => console.error(err));
     }
+    deleteElement();
   });
 
   settingElement.append(btnCancel, btnConfirm);
@@ -97,16 +91,7 @@ const modal = ({ message, state, method, id = null, datas = null }, cb) => {
 };
 
 const produitsTemplate = async () => {
-  const produitsDispo = [
-    {
-      id_produit: 1,
-      denomination: 'test',
-      prix: 1,
-      qt_dispo: 100,
-      peremption: '2022-10-10',
-      illustration: null,
-    },
-  ];
+  const produitsDispo = await fetchApiJson('getAvailableProducts');
 
   if (produitsDispo === null && Number(produitsDispo.produitsDispo) === 0) {
     return null;
@@ -197,21 +182,23 @@ const produitsTemplate = async () => {
         datePeremption[2],
       ).getTime();
       if (Date.now() < dateProduit) {
-        modal({
-          message: 'Modification de : ' + produitsDispo[index].denomination,
-          state: '',
-          action: 'post',
-          method: 'updateProduct',
-          datas: {
-            id: e.target.getAttribute('produit-id'),
-            nom: denominationInp.value,
-            prix: prixInp.value,
-            quantite: quantiteInp.value,
-            peremption: peremptionInp.value,
-            illustration: illustrationInp.value,
+        modal(
+          {
+            message: 'Modification de : ' + produitsDispo[index].denomination,
+            state: '',
+            action: 'post',
+            method: 'updateProduct',
+            datas: {
+              id: e.target.getAttribute('produit-id'),
+              nom: denominationInp.value,
+              prix: prixInp.value,
+              quantite: quantiteInp.value,
+              peremption: peremptionInp.value,
+              illustration: illustrationInp.value,
+            },
           },
           fetchApiPost,
-        });
+        );
         /*  await fetchApiPost('updateProduct', {
           id: e.target.getAttribute('produit-id'),
           nom: denominationInp.value,
@@ -451,3 +438,12 @@ const ajouterTableElement = () => {
 
 produitsTemplate();
 tablesTemplate();
+
+/* 
+authentification
+
+session ou jeton
+  if jeton
+    quoi stocker dedans
+      ? id user OU accesslevel
+*/

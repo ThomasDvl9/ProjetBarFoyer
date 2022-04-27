@@ -97,12 +97,20 @@
       }
     }
 
-    public function commandProduct($id, $qt) {
-      $query = $this->PDO->exec("UPDATE produits SET qt_dispo = qt_dispo - $qt WHERE id_produit = $id");
-      if($query) {
+    public function commandProductFromCommand($cmdid) {
+      $commandeDetails = $this->PDO->query("SELECT id_produit, qt_commandee FROM detail_commandes WHERE id_commande = $cmdid")->fetchAll(PDO::FETCH_ASSOC);
+
+      if($commandeDetails) {
+        foreach ($commandeDetails as $commandeDetail) {
+          $pid = $commandeDetail["id_produit"];
+          $qt = $commandeDetail["qt_commandee"];
+          $this->PDO->exec("UPDATE produits SET qt_dispo = qt_dispo - $qt WHERE id_produit = $pid");
+        }
+  
         http_response_code(200);
         return 1;
       }
+
       http_response_code(400);
       return 0;
     }
@@ -401,7 +409,11 @@
         return 0;
       }
 
-      // $this->commandProduct();      
+      $update = $this->commandProductFromCommand($cmdid);      
+
+      if(!$update) {
+        return 0;
+      }
       
       return $cmdid;
     }  

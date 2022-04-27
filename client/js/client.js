@@ -28,13 +28,57 @@ const fetchApiPost = (method, body) => {
   return content;
 };
 
+const modal = (message) => {
+  const deleteElement = () => {
+    modalElement.remove();
+    document.body.classList.remove('rel');
+  };
+
+  const modalElement = document.createElement('div');
+  modalElement.classList = 'modal';
+  document.body.classList.add('rel');
+
+  const settingElement = document.createElement('div');
+  settingElement.className = 'setting';
+  settingElement.innerHTML = `<h3>${message}</h3>`;
+
+  const btnCancel = document.createElement('a');
+  btnCancel.classList = 'btn btn-container btn-delete';
+  btnCancel.innerHTML = 'Annuler';
+
+  btnCancel.addEventListener('click', (e) => {
+    deleteElement();
+    console.log('Cancel');
+  });
+
+  const btnConfirm = document.createElement('a');
+  btnConfirm.classList = 'btn btn-container btn-validate';
+  btnConfirm.innerText = 'Confirmer';
+
+  btnConfirm.addEventListener('click', async (e) => {
+    console.log('Confirm');
+    location.href = 'http://172.16.40.94:5500/client/pages/commande.html';
+  });
+
+  settingElement.append(btnCancel, btnConfirm);
+  modalElement.appendChild(settingElement);
+
+  modalElement.addEventListener('click', (e) => {
+    if (e.target.classList[0] == 'modal') {
+      deleteElement(e);
+    }
+  });
+
+  document.body.appendChild(modalElement);
+};
+
 const createCookie = async (token) => {
   document.cookie =
     'cmd-token=' + token + '; expires=' + new Date(Date.now() + 1000 * 60 * 15).toGMTString();
 };
 
 const checkTableValidation = async () => {
-  const numero = Number(url.searchParams.get('table').split('?')[0]);
+  const numero = Number(url.searchParams.get('table'));
 
   // condition si table n'existe pas
   const tab = await fetchApiToJson('getTable?num=' + numero);
@@ -158,16 +202,15 @@ const verifySubmit = (arr) => {
       email,
     })
       .then((res) => {
-        if (res.status == 200) {
-          statusElement.classList = 'success';
-          statusElement.innerText = 'Envoyer avec succès !';
-        } else {
+        if (!res.status == 200) {
           statusElement.innerText = 'Données envoyés non valides !';
         }
         return res.json();
       })
       .then((json) => {
         createCookie(json);
+        modal('Confirmation de votre commande');
+
         // propose redirection pour confirmation : commande.html
       })
       .catch((err) => {
