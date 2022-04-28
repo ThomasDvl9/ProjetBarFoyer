@@ -1,29 +1,38 @@
 const sectionElement = document.querySelector('section');
-const produitsList = {};
-const tablesList = {};
 
-const fetchApi = (param) => {
-  return fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param);
+const fetchApi = (method) => {
+  return fetch('http://10.100.1.216:8080/apifoyer/' + method);
 };
 
-const fetchApiToJson = (param) => {
-  const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
+const fetchApiToJson = (method) => {
+  const produits = fetch('http://10.100.1.216:8080/apifoyer/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
   return produits;
 };
 
-let refresh = setInterval(() => {
-  commandesTemplate();
-}, 5000);
+const fetchApiPost = (param, body) => {
+  const content = fetch('http://10.100.1.216:8080/apifoyer/' + param, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify(body),
+  });
+  return content;
+};
 
-document.addEventListener('mousemove', (e) => {
-  clearInterval(refresh);
-  refresh = setInterval(() => {
-    commandesTemplate();
-  }, 5000);
-});
+// let refresh = setInterval(() => {
+//   commandesTemplate();
+// }, 5000);
+
+// document.addEventListener('mousemove', (e) => {
+//   clearInterval(refresh);
+//   refresh = setInterval(() => {
+//     commandesTemplate();
+//   }, 5000);
+// });
 
 const commandesTemplate = async () => {
   const commandes = await fetchApiToJson('getAllDetailsCommandForCheckedCommand');
@@ -35,6 +44,7 @@ const commandesTemplate = async () => {
   const commandeTemplate = commandes[0].map((commande, index) => {
     const article = document.createElement('article');
     const contactElement = document.createElement('a');
+    let nonCochee = 0;
 
     contactElement.className = 'contact';
     contactElement.href = 'mailto:' + commande.email;
@@ -56,12 +66,26 @@ const commandesTemplate = async () => {
       }</h4><input d-cmd="${detailsCommande.id_detail}" type="checkbox" ${
         Number(detailsCommande.cochee) ? 'disabled checked' : ''
       } />`;
+      !Number(detailsCommande.cochee) ? nonCochee++ : null;
     });
 
     const distribuerElement = document.createElement('a');
     distribuerElement.setAttribute('cmd', commande.id_commande);
+    distribuerElement.setAttribute('type', 'button');
+    // disabled si tous n'est pas cochee
+
     distribuerElement.classList = 'btn btn-validate btn-container';
     distribuerElement.innerText = 'Distribuer';
+
+    distribuerElement.addEventListener('click', async (e) => {
+      if (nonCochee) {
+        alert('Vous devez cochez les produits avant de confirmer la commande !');
+      } else {
+        const id = e.target.getAttribute('cmd');
+        await fetchApiPost('prepareCommand', { id });
+        commandesTemplate();
+      }
+    });
 
     article.append(contactElement, produitsElement, distribuerElement);
     return article;
@@ -72,8 +96,10 @@ const commandesTemplate = async () => {
 
   const inputElement = document.querySelectorAll('input');
   inputElement.forEach((input) => {
-    input.addEventListener('change', (e) => {
-      console.log(e.target.getAttribute('d-cmd'));
+    input.addEventListener('change', async (e) => {
+      const id = e.target.getAttribute('d-cmd');
+      await fetchApiPost('checkDetailCommand', { id });
+      commandesTemplate();
     });
   });
 };

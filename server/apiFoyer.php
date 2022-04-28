@@ -25,13 +25,7 @@
   
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
   
-      if($result) {
-        $json = $result;
-      } else { 
-        $json = 0;
-      }
-  
-      return json_encode($json, JSON_UNESCAPED_UNICODE);
+      return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
 
     public function getProductById($id) {
@@ -151,13 +145,7 @@
   
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
   
-      if($result) {
-        $json = $result;
-      } else {
-        $json = 0;
-      }
-  
-      return json_encode($json, JSON_UNESCAPED_UNICODE);
+      return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
 
     public function getAllDetailsCommandForCheckedCommand() {
@@ -189,11 +177,11 @@
     }
 
     public function addCommand() {
-      $data = json_decode(file_get_contents('php://input'));
+      $datas = json_decode(file_get_contents('php://input'));
 
       $date = date("Y-m-d H:i:s");
-      $email = $data->email;
-      $table = $data->table;
+      $email = $datas->email;
+      $table = $datas->table;
       
       if($date && $email) {
         $this->PDO->query("INSERT INTO commandes 
@@ -216,6 +204,26 @@
       }
       http_response_code(400);
       return 0;
+    }
+
+    public function prepareCommand() {
+      $data = json_decode(file_get_contents('php://input'));
+      
+      $id = $data->id;
+
+      if(!$id) {
+        return 0;
+      }
+      
+      $query = $this->PDO->query("UPDATE commandes SET preparee = '1' WHERE id_commande = $id");
+      // access level 0 required
+      if(!$query) {
+        http_response_code(400);
+        return 0;
+      }
+      
+      http_response_code(200);
+      return 1;
     } 
 
     // DETAIL COMMANDES
@@ -225,13 +233,7 @@
   
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
   
-      if($result) {
-        $json = $result;        
-      } else {
-        $json = 0;
-      }
-  
-      return json_encode($json, JSON_UNESCAPED_UNICODE);
+      return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
 
     // old version
@@ -284,6 +286,26 @@
       return 1;
     }
 
+    public function checkDetailCommand() {
+      $data = json_decode(file_get_contents('php://input'));
+      
+      $id = $data->id;
+      // user access level
+
+      if(!$id) {
+        return 0;
+      }
+      
+      $query = $this->PDO->query("UPDATE detail_commandes SET cochee = '1' WHERE id_detail = $id");
+      if(!$query) {
+        http_response_code(400);
+        return 0;
+      }
+      
+      http_response_code(200);
+      return 1;
+    }
+
     // TABLES
 
     public function getTable($numero) {
@@ -303,13 +325,7 @@
   
       $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
   
-      if ($result) {
-        $json = $result;
-      } else {
-        $json = 0;
-      }
-  
-      return json_encode($json, JSON_UNESCAPED_UNICODE);
+      return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
 
     public function addTable() {
@@ -331,7 +347,24 @@
 
       http_response_code(400);
       return 0;
-    } 
+    }
+
+    public function updateTable() {
+      $datas = json_decode(file_get_contents('php://input'));
+
+      $id = $datas->id;
+      $num = $datas->num;
+      $lien = $datas->lien;
+      
+      if($id != '' && $num != '' && $lien != '') {
+        $this->PDO->query("UPDATE tables SET numero = '$num', lien_QRcode = $lien WHERE id_table = $id");        
+        http_response_code(200);
+        return 1;
+      }
+
+      http_response_code(400);
+      return 0;
+    }
     
     public function deleteTable($table) {
       return $this->PDO->query("DELETE FROM tables WHERE id_table = $table");     
@@ -339,14 +372,30 @@
 
     // Authentification
 
-    public function authentificationUser () {
+    public function createPass() {
+      $pass = base64_encode(random_bytes(256));
+
+    }
+    
+    public function getPass() {
+      $pass = base64_encode(random_bytes(256));
+
+    }
+
+    public function authentificationUser() {
       $data = json_decode(file_get_contents('php://input'));
 
       $id = $data->id;
       $password = strtoupper(md5($data->password));
 
-      var_dump($id);
       var_dump($password);
+      $pass = $this->getPass();
+      var_dump(md5("" . $pass));
+
+      // get password $dbPassword
+      // if($password == strtoupper(md5($dbPassword . $pass))) {
+      //   echo "connexion securisee réussi !!";
+      // }
 
       if($id && $password) {
         $result = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id' AND _password = '$password'")
@@ -354,6 +403,8 @@
 
         return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
       }
+
+      $this->createPass();
       
       return 0;
     }
@@ -374,6 +425,7 @@
     }
 
     public function createToken($id, $validity_timer) {
+      // if pass est le meme
       $content = $id . "." . $validity_timer;
       
       $encrypt_method = "AES-256-CBC";
@@ -389,7 +441,7 @@
       return $token;
     }
 
-    public function commandToken($cmdid) {
+    public function createCommandToken($cmdid) {
       $command = $this->commandProductFromCommand($cmdid);
       $validity_timer = time() + 60 * MINUTES_CMD;
 
@@ -400,8 +452,8 @@
       return $this->createToken($cmdid, $validity_timer);
     }
 
-    public function userToken() {
-      $accessLevel =  $this->authentificationUser();
+    public function createUserToken() {
+      $accessLevel = $this->authentificationUser();
       $validity_timer = time() + 60 * MINUTES_AUTH;
 
 
@@ -434,18 +486,22 @@
       if($tokenDate < time()) {
         return false;
       }
-
-      $cmdid = substr($content, 0, $split);
       
-      $confirmQuery = $this->confirmCommand($cmdid);
+      return substr($content, 0, $split);
+    }
 
-      if(!$confirmQuery) {
+    public function decodeCommandToken() {
+      $cmdid = $this->decodeToken();
+
+      if($cmdid <= 0) {
         return 0;
       }
-      
-      return $cmdid;
-    }  
-}
 
+      $this->confirmcommand($cmdid);
+      return $cmdid;
+    }
+
+    // check access level middleware
+}
 
 ?>

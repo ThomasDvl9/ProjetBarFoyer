@@ -2,11 +2,11 @@ const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 
 const fetchApi = (param) => {
-  return fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param);
+  return fetch('http://10.100.1.216:8080/apifoyer/' + param);
 };
 
 const fetchApiJson = (param) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
+  const content = fetch('http://10.100.1.216:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -14,7 +14,7 @@ const fetchApiJson = (param) => {
 };
 
 const fetchApiPost = (param, body) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param, {
+  const content = fetch('http://10.100.1.216:8080/apifoyer/' + param, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -24,7 +24,19 @@ const fetchApiPost = (param, body) => {
   return content;
 };
 
-const modal = ({ message, state, method, id = null, datas = null }, cb) => {
+const isPerimer = (date) => {
+  const datePeremption = date.split('-');
+
+  const dateProduit = new Date(
+    datePeremption[0],
+    Number(datePeremption[1]) - 1,
+    datePeremption[2],
+  ).getTime();
+
+  return dateProduit < Date.now();
+};
+
+const modal = ({ message, state, method, id = null, datas = null }, fetchReq, cb) => {
   const deleteElement = () => {
     modalElement.remove();
     document.body.classList.remove('rel');
@@ -44,7 +56,6 @@ const modal = ({ message, state, method, id = null, datas = null }, cb) => {
 
   btnCancel.addEventListener('click', (e) => {
     deleteElement();
-    console.log('Cancel');
   });
 
   const btnConfirm = document.createElement('a');
@@ -52,27 +63,26 @@ const modal = ({ message, state, method, id = null, datas = null }, cb) => {
   btnConfirm.innerText = 'Confirmer';
 
   btnConfirm.addEventListener('click', async (e) => {
-    console.log('Confirm');
     if (datas != null) {
-      await cb(method, datas)
+      await fetchReq(method, datas)
         .then((res) => {
           if (res.status == 200) {
-            produitsTemplate();
+            cb();
           } else {
             throw 'error db';
           }
         })
         .catch((err) => console.error(err));
     } else if (id != 0) {
-      await cb(method + id)
+      await fetchReq(method + id)
         .then((res) => res.json())
         .then((json) => {
           if (json === 'already in command') {
-            alert('Ce produit appartient à une commande');
+            alert('Cette element appartient à une commande');
             throw 'error';
           }
         })
-        .then((c) => produitsTemplate())
+        .then((c) => cb())
         .catch((err) => console.error(err));
     }
     deleteElement();
@@ -101,14 +111,7 @@ const produitsTemplate = async () => {
     const article = document.createElement('article');
     article.setAttribute('produit-id', produit.id_produit);
 
-    const datePeremption = produit.peremption.split('-');
-
-    const dateProduit = new Date(
-      datePeremption[0],
-      Number(datePeremption[1]) - 1,
-      datePeremption[2],
-    ).getTime();
-    if (Date.now() > dateProduit) {
+    if (isPerimer(produit.peremption)) {
       article.className = 'red';
       article.innerHTML = '<h4>Produit périmé</h4>';
     }
@@ -158,46 +161,40 @@ const produitsTemplate = async () => {
   const deleteBtnProduit = document.querySelectorAll('article[produit-id] > a.btn-delete');
 
   validateBtnProduit.forEach((btn, index) => {
-    const denominationInp = document.querySelector(
-      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="denomination"]`,
-    );
-    const prixInp = document.querySelector(
-      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="prix"]`,
-    );
-    const quantiteInp = document.querySelector(
-      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="quantite"]`,
-    );
-    const peremptionInp = document.querySelector(
-      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="peremption"]`,
-    );
-    const illustrationInp = document.querySelector(
-      `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="illustration"]`,
-    );
-
     btn.addEventListener('click', async (e) => {
-      const datePeremption = peremptionInp.value.split('-');
-      const dateProduit = new Date(
-        datePeremption[0],
-        Number(datePeremption[1]) - 1,
-        datePeremption[2],
-      ).getTime();
-      if (Date.now() < dateProduit) {
+      const denominationInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="denomination"]`,
+      ).value;
+      const prixInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="prix"]`,
+      ).value;
+      const quantiteInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="quantite"]`,
+      ).value;
+      const peremptionInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="peremption"]`,
+      ).value;
+      const illustrationInp = document.querySelector(
+        `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="illustration"]`,
+      ).value;
+
+      if (!isPerimer(peremptionInp)) {
         modal(
           {
             message: 'Modification de : ' + produitsDispo[index].denomination,
             state: '',
-            action: 'post',
             method: 'updateProduct',
             datas: {
               id: e.target.getAttribute('produit-id'),
-              nom: denominationInp.value,
-              prix: prixInp.value,
-              quantite: quantiteInp.value,
-              peremption: peremptionInp.value,
-              illustration: illustrationInp.value,
+              nom: denominationInp,
+              prix: prixInp,
+              quantite: quantiteInp,
+              peremption: peremptionInp,
+              illustration: illustrationInp,
             },
           },
           fetchApiPost,
+          produitsTemplate,
         );
         /*  await fetchApiPost('updateProduct', {
           id: e.target.getAttribute('produit-id'),
@@ -225,11 +222,11 @@ const produitsTemplate = async () => {
         {
           message: 'Suppression du produit : ' + produitsDispo[index].denomination,
           state: 'red',
-          action: 'get',
           method: 'deleteProduct?product=',
           id,
         },
         fetchApi,
+        produitsTemplate,
       );
       /* await fetchApi('deleteProduct' + '?product=' + id)
         .then((res) => res.json())
@@ -300,28 +297,34 @@ const tablesTemplate = async () => {
       );
 
       btn.addEventListener('click', async (e) => {
-        alert(
-          'Id table : ' +
-            e.target.getAttribute('table-id') +
-            '\nNuméro : ' +
-            numeroInp.value +
-            '\nQrCode : ' +
-            qrCodeInp.value,
+        modal(
+          {
+            message: 'Modification de la table numero : ' + tables[index].numero,
+            state: '',
+            method: 'updateTable',
+            datas: {
+              id: e.target.getAttribute('table-id'),
+              num: numeroInp.value,
+              lien: qrCodeInp.value,
+            },
+          },
+          fetchApiPost,
+          tablesTemplate,
         );
       });
 
       deleteBtnTable[index].addEventListener('click', async (e) => {
         const id = e.target.getAttribute('table-id');
-        await fetchApi('deleteTable?table=' + id)
-          .then((res) => res.json())
-          .then((json) => {
-            if (json === 'already in command') {
-              alert('Cette table appartient à une commande');
-            } else {
-              throw 'send';
-            }
-          })
-          .catch((err) => tablesTemplate());
+        modal(
+          {
+            message: 'Suppression de la table numero : ' + tables[index].numero,
+            state: 'red',
+            method: 'deleteTable?table=',
+            id,
+          },
+          fetchApi,
+          tablesTemplate,
+        );
       });
     });
   }
@@ -368,7 +371,21 @@ const ajouterProduitElement = () => {
       const peremption = addProduitElement.querySelector('input[name="peremption"]').value;
       const illustration = addProduitElement.querySelector('input[name="illustration"]').value;
 
-      if (nom != '' && prix != '' && quantite != '' && peremption != '') {
+      const datePeremption = peremption.split('-');
+
+      const dateProduit = new Date(
+        datePeremption[0],
+        Number(datePeremption[1]) - 1,
+        datePeremption[2],
+      ).getTime();
+
+      if (
+        nom != '' &&
+        prix != '' &&
+        quantite != '' &&
+        peremption.length === 10 &&
+        dateProduit > Date.now()
+      ) {
         await fetchApiPost('addProduct', {
           nom,
           prix,
@@ -384,6 +401,8 @@ const ajouterProduitElement = () => {
           .catch((err) => {
             console.error(err);
           });
+      } else {
+        alert('Valeurs non valides !');
       }
     });
   });
@@ -419,7 +438,7 @@ const ajouterTableElement = () => {
       const num = tableElement.querySelector('input[name="numero"]').value;
       const lien = tableElement.querySelector('input[name="qr-code"]').value;
 
-      if (num && lien) {
+      if (num != '' && lien != '') {
         await fetchApiPost('addTable', {
           num,
           lien,
@@ -432,6 +451,8 @@ const ajouterTableElement = () => {
           .catch((err) => {
             console.error(err);
           });
+      } else {
+        alert('Valeurs non valides !');
       }
     });
   });
@@ -442,12 +463,3 @@ const ajouterTableElement = () => {
 
 produitsTemplate();
 tablesTemplate();
-
-/* 
-authentification
-
-session ou jeton
-  if jeton
-    quoi stocker dedans
-      ? id user OU accesslevel
-*/

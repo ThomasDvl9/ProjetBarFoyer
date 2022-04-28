@@ -3,7 +3,7 @@ const totalElement = document.getElementById('total');
 const produitsList = {};
 
 const fetchApiToJson = (method) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
+  const content = fetch('http://10.100.1.216:8080/apifoyer/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch((err) => null);
@@ -11,7 +11,7 @@ const fetchApiToJson = (method) => {
 };
 
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method, {
+  const content = fetch('http://10.100.1.216:8080/apifoyer/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -28,7 +28,7 @@ const checkValidationToken = async () => {
     return 0;
   }
 
-  return await fetchApiPost('checkValidationToken', { token })
+  return await fetchApiPost('checkValidationTokenCommand', { token })
     .then((res) => {
       if (res.status == 400) {
         return 0;

@@ -229,6 +229,10 @@ var MD5 = function (string) {
 
 /* FIN MD5 */
 
+// create pass and get it
+// md5 password + pass
+// GET /getPass
+
 document.querySelector('form').addEventListener('submit', (e) => {
   e.preventDefault();
   const idInp = document.querySelector('input[name="identifiant"]');

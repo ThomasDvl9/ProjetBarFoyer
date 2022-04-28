@@ -5,10 +5,10 @@ require_once "./Route.php";
 include "./apiFoyer.php";
 header("Access-Control-Allow-Origin: *");
 
-$user = "groupe6";
-$mdp = "Password1234g6";
+$user = "paul";
+$mdp = "Password123!";
 $host = "localhost";
-$base = "foyerbdd_g6";
+$base = "foyerbdd";
 $api = new API_Foyer($base, $user, $mdp, $host);
 
 // ensemble des methodes GET
@@ -171,7 +171,7 @@ Route::add(
             return 0;
         }
         
-        $token = $api->commandToken($id);
+        $token = $api->createCommandToken($id);
 
         if(!$token) {
             return 0;
@@ -183,10 +183,30 @@ Route::add(
 );
 
 Route::add(
-    "/checkValidationToken",
+    "/checkDetailCommand",
     function() {
         global $api;
-        $cmdid = $api->decodeToken();
+        // check access level
+        $api->checkDetailCommand();
+    },
+    "post"
+);
+
+Route::add(
+    "/prepareCommand",
+    function() {
+        global $api;
+        // check access level 0
+        $api->prepareCommand();
+    },
+    "post"
+);
+
+Route::add(
+    "/checkValidationTokenCommand",
+    function() {
+        global $api;
+        $cmdid = $api->decodeCommandToken();
         if(!$cmdid) {
             http_response_code(400);
             return 0;
@@ -243,15 +263,15 @@ Route::add(
     "/updateTable",
     function() {
         global $api;
-        if (isset($_GET['table'])) {
-            // check accessLevel = 0
-            $table = $_GET['table'];
-            echo $api->addTable($table);
-        } else {
-            echo null;
+        // check accessLevel = 0
+        $result = $api->updateTable();
+        if($result) {
+            return 1;
         }
+    
+        return null;
     },
-    "update"
+    "post"
 );
 
 Route::add(
@@ -276,6 +296,15 @@ Route::add(
 );
 
 // USERS
+
+Route::add(
+    "/getPass",
+    function() {
+        global $api;
+        return $api->createPass();
+    },
+    "get"
+);
 
 Route::add(
     "/getUser",
@@ -376,6 +405,6 @@ Route::methodNotAllowed(function () {
     echo "Cette méthode n'existe pas";
 });
 
-Route::run("/~paulhelleu/MiniProjet/index.php");
+Route::run("/apifoyer");
 
 ?>
