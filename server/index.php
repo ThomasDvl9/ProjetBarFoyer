@@ -1,7 +1,5 @@
 <?php
 
-use LDAP\Result;
-
 require_once "./Route.php";
 // include "/home/profsir/yanngouville/public_html/MiniProjetFoyer/API_Foyer.php";
 include "./apiFoyer.php";
@@ -280,15 +278,27 @@ Route::add(
 // USERS
 
 Route::add(
+    "/getUser",
+    function() {
+        global $api;
+        $result = $api->authentificationUser();
+        if($result) {
+            return $result;
+        }
+        return null;
+    },
+    "post"
+);
+
+Route::add(
     "/getUserAccessLevel",
     function() {
         global $api;
         $result = $api->getUserAccessLevel();
         if($result) {
             return $result;
-        } else {
-            return null;
         }
+        return null;
     },
     "post",
 );

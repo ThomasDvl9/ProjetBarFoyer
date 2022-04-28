@@ -274,6 +274,10 @@ const tablesTemplate = async () => {
       return article;
     });
 
+    () => {
+      return '3f8b5ae5a72bddc41ee71186057aca5957ee9fb35c0f6ff9d4008aef78ed5125';
+    };
+
     sectionTableElement.innerText = '';
 
     sectionTableElement.append(...tablesMap);

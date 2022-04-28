@@ -345,6 +345,9 @@
       $id = $data->id;
       $password = strtoupper(md5($data->password));
 
+      var_dump($id);
+      var_dump($password);
+
       if($id && $password) {
         $result = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id' AND _password = '$password'")
         ->fetchAll(PDO::FETCH_ASSOC);
@@ -400,6 +403,8 @@
     public function userToken() {
       $accessLevel =  $this->authentificationUser();
       $validity_timer = time() + 60 * MINUTES_AUTH;
+
+
     }
     
     public function decodeToken() {
