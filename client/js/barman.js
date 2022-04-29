@@ -1,11 +1,11 @@
 const sectionElement = document.querySelector('section');
 
 const fetchApi = (method) => {
-  return fetch('http://10.100.1.216:8080/apifoyer/' + method);
+  return fetch('http://192.168.1.55:8080/apifoyer/' + method);
 };
 
 const fetchApiToJson = (method) => {
-  const produits = fetch('http://10.100.1.216:8080/apifoyer/' + method)
+  const produits = fetch('http://192.168.1.55:8080/apifoyer/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -13,7 +13,7 @@ const fetchApiToJson = (method) => {
 };
 
 const fetchApiPost = (param, body) => {
-  const content = fetch('http://10.100.1.216:8080/apifoyer/' + param, {
+  const content = fetch('http://192.168.1.55:8080/apifoyer/' + param, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

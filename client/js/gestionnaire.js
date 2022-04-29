@@ -2,11 +2,11 @@ const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 
 const fetchApi = (param) => {
-  return fetch('http://10.100.1.216:8080/apifoyer/' + param);
+  return fetch('http://192.168.1.55:8080/apifoyer/' + param);
 };
 
 const fetchApiJson = (param) => {
-  const content = fetch('http://10.100.1.216:8080/apifoyer/' + param)
+  const content = fetch('http://192.168.1.55:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -14,7 +14,7 @@ const fetchApiJson = (param) => {
 };
 
 const fetchApiPost = (param, body) => {
-  const content = fetch('http://10.100.1.216:8080/apifoyer/' + param, {
+  const content = fetch('http://192.168.1.55:8080/apifoyer/' + param, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

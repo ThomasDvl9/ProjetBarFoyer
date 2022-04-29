@@ -372,30 +372,11 @@
 
     // Authentification
 
-    public function createPass() {
-      $pass = base64_encode(random_bytes(256));
-
-    }
-    
-    public function getPass() {
-      $pass = base64_encode(random_bytes(256));
-
-    }
-
     public function authentificationUser() {
       $data = json_decode(file_get_contents('php://input'));
 
       $id = $data->id;
       $password = strtoupper(md5($data->password));
-
-      var_dump($password);
-      $pass = $this->getPass();
-      var_dump(md5("" . $pass));
-
-      // get password $dbPassword
-      // if($password == strtoupper(md5($dbPassword . $pass))) {
-      //   echo "connexion securisee réussi !!";
-      // }
 
       if($id && $password) {
         $result = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id' AND _password = '$password'")
@@ -403,8 +384,6 @@
 
         return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
       }
-
-      $this->createPass();
       
       return 0;
     }
