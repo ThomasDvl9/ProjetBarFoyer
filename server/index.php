@@ -298,15 +298,6 @@ Route::add(
 // USERS
 
 Route::add(
-    "/getPass",
-    function() {
-        global $api;
-        return $api->createPass();
-    },
-    "get"
-);
-
-Route::add(
     "/getUser",
     function() {
         global $api;
