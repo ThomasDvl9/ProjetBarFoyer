@@ -1,12 +1,11 @@
 const sectionProduitElement = document.getElementById('produits');
 const sectionTableElement = document.getElementById('tables');
 const passwordInp = document.querySelector('input[name="password"]');
+const validateBtn = document.querySelector('#get-requests');
 
-let password = '';
+//#region MD5
 
-/* MD5 */
-
-var MD5 = function (string) {
+const MD5 = (string) => {
   function RotateLeft(lValue, iShiftBits) {
     return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
   }
@@ -232,28 +231,30 @@ var MD5 = function (string) {
 
   return temp.toLowerCase();
 };
-
-/* FIN MD5 */
+//#endregion MD5
 
 const fetchApi = (param) => {
-  return fetch('http://192.168.1.55:8080/apifoyer/' + param);
+  return fetch('http://10.100.1.216:8080/apifoyer/' + param);
 };
 
 const fetchApiJson = (param) => {
-  const content = fetch('http://192.168.1.55:8080/apifoyer/' + param)
+  const content = fetch('http://10.100.1.216:8080/apifoyer/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
   return content;
 };
 
-const fetchApiPost = (param, body) => {
-  const content = fetch('http://192.168.1.55:8080/apifoyer/' + param, {
+const fetchApiPost = async (param, body) => {
+  const pass = await fetchApiJson('getPass');
+  const token = MD5(MD5(passwordInp.value).toUpperCase() + pass);
+
+  const content = fetch('http://10.100.1.216:8080/apifoyer/' + param, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, token }),
   });
   return content;
 };
@@ -335,9 +336,11 @@ const modal = ({ message, state, method, id = null, datas = null }, fetchReq, cb
 };
 
 const produitsTemplate = async () => {
-  const produitsDispo = await fetchApiJson('getAvailableProducts');
+  const produitsDispo = await fetchApiPost('getAvailableProducts')
+    .then((res) => res.json())
+    .catch(() => null);
 
-  if (produitsDispo === null && Number(produitsDispo.produitsDispo) === 0) {
+  if (produitsDispo === null || produitsDispo.length == 0) {
     return null;
   }
 
@@ -456,10 +459,10 @@ const produitsTemplate = async () => {
         {
           message: 'Suppression du produit : ' + produitsDispo[index].denomination,
           state: 'red',
-          method: 'deleteProduct?product=',
-          id,
+          method: 'deleteProduct',
+          datas: { id },
         },
-        fetchApi,
+        fetchApiPost,
         produitsTemplate,
       );
       /* await fetchApi('deleteProduct' + '?product=' + id)
@@ -477,7 +480,9 @@ const produitsTemplate = async () => {
 };
 
 const tablesTemplate = async () => {
-  const tables = await fetchApiJson('getTables');
+  const tables = await fetchApiPost('getTables')
+    .then((res) => res.json())
+    .catch(() => null);
 
   if (tables != null && Number(tables) != 0) {
     const tablesMap = tables.map((table) => {
@@ -553,10 +558,10 @@ const tablesTemplate = async () => {
           {
             message: 'Suppression de la table numero : ' + tables[index].numero,
             state: 'red',
-            method: 'deleteTable?table=',
-            id,
+            method: 'deleteTable',
+            datas: { id },
           },
-          fetchApi,
+          fetchApiPost,
           tablesTemplate,
         );
       });
@@ -695,5 +700,7 @@ const ajouterTableElement = () => {
   return tableElement;
 };
 
-produitsTemplate();
-tablesTemplate();
+validateBtn.addEventListener('click', async (e) => {
+  await produitsTemplate();
+  await tablesTemplate();
+});
