@@ -17,17 +17,24 @@
 
     // PRODUITS
 
-    public function getAvailableProducts() {
-      $result = $this->PDO->query("SELECT * FROM produits")
-      ->fetchAll(PDO::FETCH_ASSOC);
+    public function getAvailableProducts() {      
+      try {
+        $result = $this->PDO->query("SELECT * FROM produits")
+        ->fetchAll(PDO::FETCH_ASSOC);
+      } catch(Exception $err) {
+        $result = null;
+      }
   
       return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
 
     public function getProductById($id) {
-      $objPDOStatement = $this->PDO->query("SELECT * FROM produits WHERE id_produit = $id");
-  
-      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+      try {
+        $result = $this->PDO->query("SELECT * FROM produits WHERE id_produit = $id")
+        ->fetchAll(PDO::FETCH_ASSOC);
+      } catch(Exception $err) {
+        $result = null;
+      }
   
       return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
