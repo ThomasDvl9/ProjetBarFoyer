@@ -3,7 +3,7 @@ const totalElement = document.getElementById('total');
 const produitsList = {};
 
 const fetchApiToJson = (method) => {
-  const content = fetch('http://192.168.1.55:8080/apifoyer/' + method)
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch((err) => null);
@@ -11,7 +11,7 @@ const fetchApiToJson = (method) => {
 };
 
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://192.168.1.55:8080/apifoyer/' + method, {
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -60,6 +60,7 @@ const displayCommand = async () => {
   let sommeTotal = 0;
 
   totalElement.innerHTML = 'Pour un total de <b></b> €';
+  commandElement.innerHTML = '';
 
   detailsCommands.map(async (detailsCommand) => {
     if (!produitsList[detailsCommand.id_produit]) {
@@ -88,8 +89,6 @@ const displayCommand = async () => {
     commandElement.appendChild(element);
     totalElement.querySelector('b').innerText = Math.round(sommeTotal * 100) / 100;
   });
-
-  alert('Votre commande à été confirmer !');
 };
 
 displayCommand();

@@ -5,10 +5,10 @@ require_once "./Route.php";
 include "./apiFoyer.php";
 header("Access-Control-Allow-Origin: *");
 
-$user = "paul";
-$mdp = "Password123!";
+$user = "groupe6";
+$mdp = "Password1234g6";
 $host = "localhost";
-$base = "foyerbdd";
+$base = "foyerbdd_g6";
 $api = new API_Foyer($base, $user, $mdp, $host);
 
 // ensemble des methodes GET
@@ -27,7 +27,23 @@ Route::add(
     "/getAvailableProducts",
     function () {
         global $api;
-        echo $api->getAvailableProducts();
+        $data = json_decode(file_get_contents('php://input'));
+
+        if($api->isValidPassword("Gestionnaire", $data->token)) {
+            http_response_code(200);
+            return $api->getAvailableProducts();
+        }
+        http_response_code(400);
+        return json_encode("invalid token");
+    },
+    "post"
+);
+
+Route::add(
+    "/getAvailableProducts",
+    function () {
+        global $api;
+        return $api->getAvailableProducts();
     },
     "get"
 );
@@ -88,20 +104,21 @@ Route::add(
     "/deleteProduct",
     function () {
         global $api;
-        $product = $_GET['product'];
-        if($product) {
-            if($api->deleteProduct($product)) {
-                http_response_code(200);
-                echo 1;
-                return 1;
-            } else {
-                http_response_code(400);
-                echo json_encode("already in command");               
-            }
+        $result = $api->deleteProduct();
+        if($result == -1) {
+            http_response_code(400);
+            return json_encode("invalid token");         
         } 
-        http_response_code(400);
+        else if($result) {
+            http_response_code(200);
+            return 1;
+        }
+        else {
+            http_response_code(400);
+            return json_encode("already in command");         
+        }
     },
-    "get"
+    "post"
 );
 
 // COMMANDES
@@ -241,7 +258,23 @@ Route::add(
     "/getTables", 
     function() {
         global $api;
-        echo $api->getTables();
+        $data = json_decode(file_get_contents('php://input'));
+
+        if($api->isValidPassword("Gestionnaire", $data->token)) {
+            http_response_code(200);
+            return $api->getTables();
+        }
+        http_response_code(400);
+        return json_encode("invalid token");
+    },
+    "post"
+);
+
+Route::add(
+    "/getTables", 
+    function() {
+        global $api;
+        return $api->getTables();
     },
     "get"
 );
@@ -251,10 +284,9 @@ Route::add(
     function() {
         global $api;
         if($api->addTable()) {
-            echo 1;
-        } else {
-            echo 0;
+            return 1;
         }
+        return 0;
     },
     "post"
 );
@@ -276,26 +308,32 @@ Route::add(
 
 Route::add(
     "/deleteTable",
-    function() {
+    function () {
         global $api;
-        $table = $_GET['table'];
-        // check accessLevel = 0
-        if($table) {
-            if($api->deleteTable($table)) {
-                http_response_code(200);
-                return 1;
-            } else {
-                http_response_code(400);
-                return json_encode("already in command");               
-            }
-        } 
+        $result = $api->deleteTable();
+        if($result == -1) {
+            http_response_code(400);
+            return json_encode("invalid token");         
+        } else if($result) {
+            http_response_code(200);
+            return 1;
+        }
         http_response_code(400);
-        return 0;
+        return json_encode("already in command");         
     },
-    "get"
+    "post"
 );
 
 // USERS
+
+Route::add(
+    "/getPass",
+    function() {
+        global $api;
+        return json_encode($api->getPass());
+    },
+    "get"
+);
 
 Route::add(
     "/getUser",
@@ -396,6 +434,6 @@ Route::methodNotAllowed(function () {
     echo "Cette méthode n'existe pas";
 });
 
-Route::run("/apifoyer");
+Route::run("/~paulhelleu/MiniProjet/index.php");
 
 ?>

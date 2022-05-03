@@ -15,15 +15,11 @@
       }
     }
 
-    // setcookie("nom", "contenu");
-    // session_start();
-
     // PRODUITS
 
     public function getAvailableProducts() {
-      $objPDOStatement = $this->PDO->query("SELECT * FROM produits");
-  
-      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+      $result = $this->PDO->query("SELECT * FROM produits")
+      ->fetchAll(PDO::FETCH_ASSOC);
   
       return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
@@ -55,14 +51,20 @@
     }
 
     public function updateProduct() {
-      $data = json_decode(file_get_contents('php://input'));
+      $datas = json_decode(file_get_contents('php://input'));
 
-      $id = $data->id;
-      $nom = $data->nom;
-      $prix = $data->prix;
-      $quantite = $data->quantite;
-      $peremption = $data->peremption;
-      $illustration = $data->illustration;
+      $id = $datas->id;
+      $nom = $datas->nom;
+      $prix = $datas->prix;
+      $quantite = $datas->quantite;
+      $peremption = $datas->peremption;
+      $illustration = $datas->illustration;
+      $token = $datas->token;
+
+      if(!$this->isValidPassword("Gestionnaire", $token)) {
+        http_response_code(400);
+        return 0;
+      }
       
       if($id && $nom && $prix && $quantite && $peremption && $illustration) {
         $this->PDO->query("UPDATE produits SET denomination = '$nom', qt_dispo = $quantite, prix = $prix, peremption = '$peremption', illustration = '$illustration' WHERE id_produit = $id");        
@@ -82,14 +84,22 @@
       $quantite = $data->quantite;
       $peremption = $data->peremption;
       $illustration = $data->illustration;
+      $password = $data->token;
+
+      if(!$this->isValidPassword("Gestionnaire", $password)) {
+        http_response_code(400);
+        return 0;
+      }
       
       if($nom && $prix && $quantite && $peremption && $illustration) {
         $this->PDO->exec("INSERT INTO produits (denomination, prix, qt_dispo, peremption, illustration) 
           VALUES ('$nom', $prix, $quantite, '$peremption', '$illustration')");
         http_response_code(200);
-      } else {
-        http_response_code(400);
+        return 1;
       }
+
+      http_response_code(400);
+      return 0;
     }
 
     public function commandProductFromCommand($cmdid) {
@@ -126,8 +136,23 @@
       return 1;      
     }
 
-    public function deleteProduct($product) {
-      return $this->PDO->exec("DELETE FROM produits WHERE id_produit = $product");
+    public function deleteProduct() {
+      $datas = json_decode(file_get_contents('php://input'));
+
+      $id = $datas->id;
+      $token = $datas->token;
+
+      if(!$this->isValidPassword("Gestionnaire", $token)) {
+        http_response_code(400);
+        return -1;
+      }
+      
+      if($id) {
+        return $this->PDO->exec("DELETE FROM produits WHERE id_produit = $id");
+      } 
+      
+      http_response_code(400);
+      return json_encode("Data no valid");
     }
 
     // COMMANDES
@@ -329,20 +354,23 @@
     }
 
     public function addTable() {
-      $data = json_decode(file_get_contents('php://input'));
+      $datas = json_decode(file_get_contents('php://input'));
 
-      $num = $data->num;
-      $lien = $data->lien;
+      $num = $datas->num;
+      $lien = $datas->lien;
+      $token = $datas->token;
+
+      if(!$this->isValidPassword("Gestionnaire", $token)) {
+        http_response_code(400);
+        return 0;
+      }
 
       if($num && $lien) {
         $objPDOStatement = $this->PDO->exec("INSERT INTO tables (numero, lien_QRcode) VALUES ($num, $lien)");
         if($objPDOStatement) {
           http_response_code(200);
           return 1;
-        } else {
-          http_response_code(400);
-          return 0;
-        }
+        }        
       }
 
       http_response_code(400);
@@ -355,9 +383,15 @@
       $id = $datas->id;
       $num = $datas->num;
       $lien = $datas->lien;
+      $token = $datas->token;
+
+      if(!$this->isValidPassword("Gestionnaire", $token)) {
+        http_response_code(400);
+        return 0;
+      }
       
-      if($id != '' && $num != '' && $lien != '') {
-        $this->PDO->query("UPDATE tables SET numero = '$num', lien_QRcode = $lien WHERE id_table = $id");        
+      if($id && $num != '' && $lien != '') {
+        $this->PDO->query("UPDATE tables SET numero = '$num', lien_QRcode = '$lien' WHERE id_table = $id");        
         http_response_code(200);
         return 1;
       }
@@ -366,25 +400,79 @@
       return 0;
     }
     
-    public function deleteTable($table) {
-      return $this->PDO->query("DELETE FROM tables WHERE id_table = $table");     
+    public function deleteTable() {
+      $datas = json_decode(file_get_contents('php://input'));
+
+      $id = $datas->id;
+      $token = $datas->token;
+
+      if(!$this->isValidPassword("Gestionnaire", $token)) {
+        http_response_code(400);
+        return -1;
+      }
+
+      if($id) {
+        return $this->PDO->query("DELETE FROM tables WHERE id_table = $id");     
+      }
+
+      http_response_code(400);
+      return json_encode("Data no valid");
     }
 
     // Authentification
 
+    public function createPass() {
+      $pass = base64_encode(random_bytes(150));
+      $query = $this->PDO->query("UPDATE pass SET passcode = '$pass' WHERE id = 1");
+      if($query) {
+        return $pass;
+      }
+      return 0;
+    }
+    
+    public function getPass() {
+      $pass = $this->PDO->query("SELECT passcode FROM pass WHERE id = 1")
+      ->fetchAll(PDO::FETCH_ASSOC);
+      return $pass ? $pass[0]["passcode"] : null;
+    }
+
+    public function isValidPassword($role, $password) {
+      $result = $this->PDO->query("SELECT _password FROM users WHERE _login = '$role'")
+      ->fetchAll(PDO::FETCH_ASSOC);
+
+      if(!$result) {
+        return 0;
+      }
+
+      $validToken = md5($result[0]["_password"] . $this->getPass());
+
+      if($password == $validToken) {
+        $this->createPass();
+        return 1;
+      }
+
+      return 0;
+    }
+    
     public function authentificationUser() {
       $data = json_decode(file_get_contents('php://input'));
 
       $id = $data->id;
       $password = strtoupper(md5($data->password));
 
-      if($id && $password) {
-        $result = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id' AND _password = '$password'")
+      if(!$this->isValidPassword($id, $password)) {
+        return 0;
+      }
+
+      if($id) {
+        $result = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id'")
         ->fetchAll(PDO::FETCH_ASSOC);
+
+        $this->createPass();
 
         return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
       }
-      
+     
       return 0;
     }
 
