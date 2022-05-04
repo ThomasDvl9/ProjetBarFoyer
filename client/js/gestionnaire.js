@@ -248,7 +248,6 @@ const fetchApiJson = (param) => {
 
 const fetchApiPost = async (param, body) => {
   const pass = await fetchApiJson('getPass');
-  passwordInp.value = 'Password12345';
   const token = MD5(MD5(passwordInp.value).toUpperCase() + pass);
 
   const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param, {
@@ -302,10 +301,15 @@ const modal = ({ message, state, method, id = null, datas = null }, fetchReq, cb
   btnConfirm.addEventListener('click', async (e) => {
     if (datas != null) {
       await fetchReq(method, datas)
-        .then((res) => {
+        .then(async (res) => {
           if (res.status == 200) {
             cb();
           } else {
+            const json = await res.json();
+            if (json == 'invalid token') {
+              alert('Mot de passe non valide !');
+              return 0;
+            }
             throw 'error db';
           }
         })

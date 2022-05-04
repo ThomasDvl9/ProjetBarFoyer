@@ -40,9 +40,12 @@
     }
 
     public function getProductsFromCommandId($cmdid) {
-      $objPDOStatement = $this->PDO->query("SELECT id_produit FROM detail_commandes WHERE id_commande = $cmdid");
-  
-      $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+      try {
+        $result = $this->PDO->query("SELECT id_produit FROM detail_commandes WHERE id_commande = $cmdid")
+        ->fetchAll(PDO::FETCH_ASSOC);
+      } catch(Exception $err) {
+        return 0;
+      }
 
       $productsTab = array();
 
@@ -398,7 +401,11 @@
       }
       
       if($id && $num != '' && $lien != '') {
-        $this->PDO->query("UPDATE tables SET numero = '$num', lien_QRcode = '$lien' WHERE id_table = $id");        
+        try {
+          $this->PDO->query("UPDATE tables SET numero = '$num', lien_QRcode = '$lien' WHERE id_table = $id");        
+        } catch(Exception $err) {
+          return 0;
+        }
         http_response_code(200);
         return 1;
       }
