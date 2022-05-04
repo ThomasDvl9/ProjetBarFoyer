@@ -23,21 +23,26 @@ const fetchApiPost = (param, body) => {
   return content;
 };
 
-// let refresh = setInterval(() => {
-//   commandesTemplate();
-// }, 5000);
+let refresh = setInterval(() => {
+  commandesTemplate();
+}, 5000);
 
-// document.addEventListener('mousemove', (e) => {
-//   clearInterval(refresh);
-//   refresh = setInterval(() => {
-//     commandesTemplate();
-//   }, 5000);
-// });
+document.addEventListener('mousemove', (e) => {
+  clearInterval(refresh);
+  refresh = setInterval(() => {
+    commandesTemplate();
+  }, 5000);
+});
 
 const commandesTemplate = async () => {
   const commandes = await fetchApiToJson('getAllDetailsCommandForCheckedCommand');
 
   if (commandes === null) {
+    return 0;
+  }
+
+  if (!commandes[0].length || !commandes[1].length || !commandes[2].length) {
+    sectionElement.innerHTML = "<h3>Aucune commandes n'as été faite !</h3>";
     return 0;
   }
 
