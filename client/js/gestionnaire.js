@@ -257,6 +257,7 @@ const fetchApiPost = async (param, body) => {
     },
     body: JSON.stringify({ ...body, token }),
   });
+  
   return content;
 };
 

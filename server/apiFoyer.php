@@ -232,7 +232,11 @@
     }
 
     public function confirmCommand($id) {
-      $query = $this->PDO->query("UPDATE commandes SET confirmee = '1' WHERE id_commande = $id");
+      try {
+        $query = $this->PDO->query("UPDATE commandes SET confirmee = '1' WHERE id_commande = $id");
+      } catch(Exception $err) {
+        return 0;
+      }
       if($query) {
         http_response_code(200);
         return 1;
@@ -245,13 +249,22 @@
       $data = json_decode(file_get_contents('php://input'));
       
       $id = $data->id;
+      $token = $data->token;
 
-      if(!$id) {
+      if(!($id && $token)) {
         return 0;
       }
-      
-      $query = $this->PDO->query("UPDATE commandes SET preparee = '1' WHERE id_commande = $id");
-      // access level 0 required
+
+      if(!$this->isValidPassword("Barman", $token) || !$this->isValidPassword("Gestionnaire", $token)) {
+        return 0;
+      }
+
+      try {
+        $query = $this->PDO->query("UPDATE commandes SET preparee = '1' WHERE id_commande = $id");
+      } catch(Exception $err) {
+        return 0;
+      }
+
       if(!$query) {
         http_response_code(400);
         return 0;
@@ -325,13 +338,18 @@
       $data = json_decode(file_get_contents('php://input'));
       
       $id = $data->id;
-      // user access level
+      $token = $data->token;
 
-      if(!$id) {
+      if(!($id && $token)) {
+        return 0;
+      }
+
+      try {
+        $query = $this->PDO->query("UPDATE detail_commandes SET cochee = '1' WHERE id_detail = $id");
+      } catch(Exception $err) {
         return 0;
       }
       
-      $query = $this->PDO->query("UPDATE detail_commandes SET cochee = '1' WHERE id_detail = $id");
       if(!$query) {
         http_response_code(400);
         return 0;
@@ -451,8 +469,12 @@
     }
 
     public function isValidPassword($role, $password) {
-      $result = $this->PDO->query("SELECT _password FROM users WHERE _login = '$role'")
-      ->fetchAll(PDO::FETCH_ASSOC);
+      try {
+        $result = $this->PDO->query("SELECT _password FROM users WHERE _login = '$role'")
+        ->fetchAll(PDO::FETCH_ASSOC);
+      } catch(Exception $err) {
+        return 0;
+      }
 
       if(!$result) {
         return 0;
@@ -461,7 +483,6 @@
       $validToken = md5($result[0]["_password"] . $this->getPass());
 
       if($password == $validToken) {
-        $this->createPass();
         return 1;
       }
 

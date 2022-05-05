@@ -1,4 +1,6 @@
 const sectionElement = document.querySelector('section');
+const passwordInp = document.querySelector('input[name="password"]');
+const validateBtn = document.querySelector('#get-requests');
 
 const fetchApi = (method) => {
   return fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method);
@@ -12,13 +14,16 @@ const fetchApiToJson = (method) => {
   return produits;
 };
 
-const fetchApiPost = (param, body) => {
+const fetchApiPost = async (param, body) => {
+  const pass = await fetchApiJson('getPass');
+  const token = MD5(MD5(passwordInp.value).toUpperCase() + pass);
+
   const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ ...body, token }),
   });
   return content;
 };
@@ -34,18 +39,7 @@ document.addEventListener('mousemove', (e) => {
   }, 5000);
 });
 
-const commandesTemplate = async () => {
-  const commandes = await fetchApiToJson('getAllDetailsCommandForCheckedCommand');
-
-  if (commandes === null) {
-    return 0;
-  }
-
-  if (!commandes[0].length || !commandes[1].length || !commandes[2].length) {
-    sectionElement.innerHTML = "<h3>Aucune commandes n'as été faite !</h3>";
-    return 0;
-  }
-
+const commandesTemplate = (commandes) => {
   const commandeTemplate = commandes[0].map((commande, index) => {
     const article = document.createElement('article');
     const contactElement = document.createElement('a');
@@ -109,4 +103,19 @@ const commandesTemplate = async () => {
   });
 };
 
-commandesTemplate();
+const fetchCommandes = async () => {
+  const commandes = await fetchApiToJson('getAllDetailsCommandForCheckedCommand');
+
+  if (commandes === null) {
+    return 0;
+  }
+
+  if (!commandes[0].length || !commandes[1].length || !commandes[2].length) {
+    sectionElement.innerHTML = "<h3>Aucune commandes n'as été faite !</h3>";
+    return 0;
+  }
+
+  commandesTemplate(commandes);
+};
+
+fetchCommandes();

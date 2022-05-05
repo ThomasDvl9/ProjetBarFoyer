@@ -196,7 +196,7 @@ Route::add(
 
         return json_encode($token);
     },
-    "post",
+    "post"
 );
 
 Route::add(
@@ -232,7 +232,7 @@ Route::add(
         http_response_code(200);
         return json_encode($cmdid);
     },
-    "post",
+    "post"
 );
 
 // TABLES
@@ -251,7 +251,7 @@ Route::add(
         }
         http_response_code(400);
     },
-    "get",
+    "get"
 );
 
 Route::add(
@@ -358,7 +358,7 @@ Route::add(
         }
         return null;
     },
-    "post",
+    "post"
 );
 
 // Route::add(
