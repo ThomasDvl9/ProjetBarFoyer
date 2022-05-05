@@ -1,15 +1,27 @@
-// cookie minutes timer 33/77
+// info: cookie minutes timer 105/77
 
 const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
 const totalElement = document.getElementById('total');
 const statusElement = document.getElementById('status');
+
+// inputs quantitée des produits
 let quantiteInp = null;
+// quantiter des produits
 const qt = [];
 
+// objet URL
 const url = new URL(location);
+// numéro de la table
 let table = null;
 
+/* 
+  in  method : string (méthode GET)
+  ----
+  out Array<Object>
+  ----
+  but (parser le JSON pour le convertir en JS)
+*/
 const fetchApiToJson = (method) => {
   const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
     .then((res) => res.json())
@@ -18,6 +30,14 @@ const fetchApiToJson = (method) => {
   return content;
 };
 
+/*
+  in  method : String
+      body : Object
+  ----
+  out Promise<Response> 
+  ----
+  but (renvoie status de la requête)
+*/
 const fetchApiPost = (method, body) => {
   const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method, {
     method: 'POST',
@@ -29,6 +49,13 @@ const fetchApiPost = (method, body) => {
   return content;
 };
 
+/* 
+  in  message : String
+  ----
+  out undefined 
+  ----
+  but (creation elements HTML dans la fonction)
+*/
 const modal = (message) => {
   const deleteElement = () => {
     modalElement.remove();
@@ -73,11 +100,26 @@ const modal = (message) => {
   document.body.appendChild(modalElement);
 };
 
-const createCookie = async (token) => {
+/* 
+  in  token : String
+  ----
+  out undefined
+  ----
+  but (créer un cookie "cmd-token")
+*/
+const createCookie = (token) => {
   document.cookie =
     'cmd-token=' + token + '; expires=' + new Date(Date.now() + 1000 * 60 * 15).toGMTString();
 };
 
+/* 
+  ASYNCHRONE
+  in  undefined
+  ----
+  out undefined
+  ----
+  but (vérifier si la table existe bien)
+*/
 const checkTableValidation = async () => {
   const numero = Number(url.searchParams.get('table'));
 
@@ -91,64 +133,7 @@ const checkTableValidation = async () => {
   h3.innerHTML = 'Vous êtes à la table ' + numero;
 };
 
-checkTableValidation();
-
-const produitsTemplate = async () => {
-  const produitsDispo = await fetchApiToJson('getAvailableProducts');
-
-  if (produitsDispo === null && Number(produitsDispo) === 0) {
-    return 0;
-  }
-
-  const filtreProduits = produitsDispo.filter((produit) => {
-    const datePeremption = produit.peremption.split('-');
-    const dateProduit = new Date(datePeremption[0], datePeremption[1], datePeremption[2]).getTime();
-
-    // filtre produit périmer et quantite
-    return Date.now() < dateProduit && Number(produit.qt_dispo);
-  });
-
-  const produitsMap = filtreProduits.map((produit) => {
-    const article = document.createElement('article');
-    article.classList = 'products';
-    article.innerHTML = `
-      <div>
-        <p>Nom : ${produit.denomination}</p>
-        <p>Prix : <span class="price">${produit.prix}</span> €</p>
-        <div class="input-group">
-          <label>Quantite :</label>
-          <input type="number" name="quantite" pattern="\\d*" value="0" min="0" max="${
-            produit.qt_dispo
-          }" />
-        </div>
-      </div>
-      <div>
-        <img src="../img/${
-          String(produit.illustration).toLowerCase() === 'null'
-            ? 'no-image.png'
-            : produit.illustration
-        }" alt="icon" />
-      </div>`;
-
-    () => {
-      return '3f8b5ae5a72bddc41ee71186057aca5957ee9fb35c0f6ff9d4008aef78ed5125';
-    };
-
-    qt.push(produit.qt_dispo);
-
-    return article;
-  });
-
-  sectionElement.innerHTML = '';
-
-  sectionElement.append(...produitsMap);
-
-  quantiteInp = document.querySelectorAll('input[name="quantite"]');
-
-  totalFeature(filtreProduits);
-  verifySubmit(filtreProduits);
-};
-
+/*  */
 const totalFeature = (arr) => {
   quantiteInp.forEach((inp) => {
     inp.addEventListener('change', () => {
@@ -181,6 +166,7 @@ const totalFeature = (arr) => {
   });
 };
 
+/*  */
 const verifySubmit = (arr) => {
   const btnSubmit = document.querySelector('a[type="button"]');
 
@@ -228,21 +214,21 @@ const verifySubmit = (arr) => {
         if (res.status == 401) {
           statusElement.innerText =
             "Trop tard quelqu'un viens de commander un produit que vous avez choisi !";
-          produitsTemplate();
-          throw 'error db';
+          fetchProduits();
+          throw 'invalid request';
         }
 
         if (res.status == 400) {
           statusElement.innerText = 'Données envoyés non valides !';
-          produitsTemplate();
-          throw 'error db';
+          fetchProduits();
+          throw 'invalid request';
         }
       })
       .then((json) => {
         createCookie(json);
         modal('Confirmation de votre commande');
 
-        // propose redirection pour confirmation : commande.html
+        // propose redirection pour confirmation : mail -> commande.html?cmdid=token
       })
       .catch((err) => {
         console.error('err : ', err);
@@ -250,4 +236,85 @@ const verifySubmit = (arr) => {
   });
 };
 
-produitsTemplate();
+/* 
+  ASYNCHRONE
+  in  produitsDispo : Array<Object>
+  ----
+  out 
+  ----
+  but
+ */
+const produitsTemplate = (produitsDispo) => {
+  /*  */
+  const filtreProduits = produitsDispo.filter((produit) => {
+    const datePeremption = produit.peremption.split('-');
+    const dateProduit = new Date(datePeremption[0], datePeremption[1], datePeremption[2]).getTime();
+
+    // filtre produit périmer et quantite
+    return Date.now() < dateProduit && Number(produit.qt_dispo);
+  });
+
+  /*  */
+  const produitsMap = filtreProduits.map((produit) => {
+    const article = document.createElement('article');
+    article.classList = 'products';
+    article.innerHTML = `
+      <div>
+        <p>Nom : ${produit.denomination}</p>
+        <p>Prix : <span class="price">${produit.prix}</span> €</p>
+        <div class="input-group">
+          <label>Quantite :</label>
+          <input type="number" name="quantite" pattern="\\d*" value="0" min="0" max="${
+            produit.qt_dispo
+          }" />
+        </div>
+      </div>
+      <div>
+        <img src="../img/${
+          String(produit.illustration).toLowerCase() === 'null'
+            ? 'no-image.png'
+            : produit.illustration
+        }" alt="icon" />
+      </div>`;
+
+    () => {
+      return '3f8b5ae5a72bddc41ee71186057aca5957ee9fb35c0f6ff9d4008aef78ed5125';
+    };
+
+    qt.push(produit.qt_dispo);
+
+    return article;
+  });
+
+  sectionElement.innerHTML = '';
+  sectionElement.append(...produitsMap);
+
+  quantiteInp = document.querySelectorAll('input[name="quantite"]');
+
+  totalFeature(filtreProduits);
+  verifySubmit(filtreProduits);
+};
+
+/* 
+  ASYNCHRONE
+  in  undefined
+  ----
+  out undefined
+  ----
+  but (rechercher les produits et appeler la fonction produitsTemplate avec les produits en paramètre)
+*/
+const fetchProduits = async () => {
+  const produitsDispo = await fetchApiToJson('getAvailableProducts');
+
+  if (produitsDispo === null && produitsDispo == 0) {
+    return 0;
+  }
+
+  produitsTemplate(produitsDispo);
+};
+
+/*  */
+(async () => {
+  await checkTableValidation();
+  fetchProduits();
+})();
