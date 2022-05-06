@@ -23,7 +23,7 @@ let table = null;
   but (parser le JSON pour le convertir en JS)
 */
 const fetchApiToJson = (method) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
+  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -39,7 +39,7 @@ const fetchApiToJson = (method) => {
   but (renvoie status de la requête)
 */
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method, {
+  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -85,7 +85,7 @@ const modal = (message) => {
 
   btnConfirm.addEventListener('click', async (e) => {
     console.log('Confirm');
-    location.href = 'http://172.16.40.94:5500/client/pages/commande.html';
+    location.href = 'http://192.168.1.26:5500/client/pages/commande.html';
   });
 
   settingElement.append(btnCancel, btnConfirm);
@@ -126,7 +126,7 @@ const checkTableValidation = async () => {
   // condition si table n'existe pas
   const tab = await fetchApiToJson('getTable?num=' + numero);
   if (!(tab && tab.length)) {
-    location.href = 'http://172.16.40.94:5500/client/pages';
+    location.href = 'http://192.168.1.26:5500/client/pages';
   }
 
   table = tab[0].id_table;

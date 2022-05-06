@@ -2,8 +2,11 @@ const commandElement = document.getElementById('command');
 const totalElement = document.getElementById('total');
 const produitsList = {};
 
+const url = new URL(location);
+let cmdId = null;
+
 const fetchApiToJson = (method) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
+  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch((err) => null);
@@ -11,7 +14,7 @@ const fetchApiToJson = (method) => {
 };
 
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method, {
+  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -19,6 +22,10 @@ const fetchApiPost = (method, body) => {
     body: JSON.stringify(body),
   });
   return content;
+};
+
+const checkTableValidation = async () => {
+  const cmdToken = Number(url.searchParams.get('token'));
 };
 
 const checkValidationToken = async () => {

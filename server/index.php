@@ -1,14 +1,14 @@
 <?php
 
 require_once "./Route.php";
-// include "/home/profsir/yanngouville/public_html/MiniProjetFoyer/API_Foyer.php";
 include "./apiFoyer.php";
+include "./mailer.php";
 header("Access-Control-Allow-Origin: *");
 
-$user = "groupe6";
-$mdp = "Password1234g6";
+$user = "paul";
+$mdp = "Password123!";
 $host = "localhost";
-$base = "foyerbdd_g6";
+$base = "foyerbdd";
 $api = new API_Foyer($base, $user, $mdp, $host);
 
 // ensemble des methodes GET
@@ -16,7 +16,7 @@ $api = new API_Foyer($base, $user, $mdp, $host);
 Route::add(
     "/",
     function () {
-        echo "Bienvenue sur REST API du groupe6";
+        return "Bienvenue sur REST API du groupe6";
     },
     "get"
 );
@@ -29,7 +29,7 @@ Route::add(
         global $api;
         $data = json_decode(file_get_contents('php://input'));
 
-        if($api->isValidPassword("Gestionnaire", $data->token)) {
+        if ($api->isValidPassword("Gestionnaire", $data->token)) {
             http_response_code(200);
             return $api->getAvailableProducts();
         }
@@ -53,7 +53,7 @@ Route::add(
     function () {
         global $api;
         $id = $_GET["id"];
-        if($id) {
+        if ($id) {
             return $api->getProductById($id);
         }
         http_response_code(400);
@@ -66,7 +66,7 @@ Route::add(
     function () {
         global $api;
         $id = $_GET["id"];
-        if($id) {
+        if ($id) {
             return $api->getProductsFromCommandId($id);
         }
         http_response_code(400);
@@ -78,7 +78,7 @@ Route::add(
     "/updateProduct",
     function () {
         global $api;
-        if($api->updateProduct()) {
+        if ($api->updateProduct()) {
             echo 1;
         } else {
             echo 0;
@@ -91,10 +91,10 @@ Route::add(
     "/addProduct",
     function () {
         global $api;
-        if($api->addProduct()) {
+        if ($api->addProduct()) {
             echo 1;
         } else {
-            echo 0; 
+            echo 0;
         }
     },
     "post"
@@ -105,17 +105,15 @@ Route::add(
     function () {
         global $api;
         $result = $api->deleteProduct();
-        if($result == -1) {
+        if ($result == -1) {
             http_response_code(400);
-            return json_encode("invalid token");         
-        } 
-        else if($result) {
+            return json_encode("invalid token");
+        } else if ($result) {
             http_response_code(200);
             return 1;
-        }
-        else {
+        } else {
             http_response_code(400);
-            return json_encode("already in command");         
+            return json_encode("already in command");
         }
     },
     "post"
@@ -137,9 +135,9 @@ Route::add(
     function () {
         global $api;
         $id = $_GET["id"];
-        if($id) {
+        if ($id) {
             return $api->getCommandById($id);
-        } 
+        }
     },
     "get"
 );
@@ -157,7 +155,7 @@ Route::add(
 
 Route::add(
     "/getCommandsDetails",
-    function() {
+    function () {
         global $api;
         echo $api->getCommandsDetails();
     },
@@ -166,10 +164,10 @@ Route::add(
 
 Route::add(
     "/getCommandDetailByCommandId",
-    function() {
+    function () {
         global $api;
         $id = $_GET["id"];
-        if($id) {
+        if ($id) {
             return $api->getCommandDetailByCommandId($id);
         }
         http_response_code(400);
@@ -180,17 +178,17 @@ Route::add(
 
 Route::add(
     "/addCommandDetails",
-    function() {
+    function () {
         global $api;
-        
+
         $id = $api->addCommand();
-        if(!$api->addCommandDetails($id)) {
+        if (!$api->addCommandDetails($id)) {
             return 0;
         }
-        
+
         $token = $api->createCommandToken($id);
 
-        if(!$token) {
+        if (!$token) {
             return 0;
         }
 
@@ -201,30 +199,38 @@ Route::add(
 
 Route::add(
     "/checkDetailCommand",
-    function() {
+    function () {
         global $api;
-        // check access level
-        $api->checkDetailCommand();
+        if ($api->checkDetailCommand()) {
+            http_response_code(200);
+            return 1;
+        }
+        http_response_code(400);
+        return 0;
     },
     "post"
 );
 
 Route::add(
     "/prepareCommand",
-    function() {
+    function () {
         global $api;
-        // check access level 0
-        $api->prepareCommand();
+        if ($api->prepareCommand()) {
+            http_response_code(200);
+            return 1;
+        }
+        http_response_code(400);
+        return 0;
     },
     "post"
 );
 
 Route::add(
     "/checkValidationTokenCommand",
-    function() {
+    function () {
         global $api;
         $cmdid = $api->decodeCommandToken();
-        if(!$cmdid) {
+        if (!$cmdid) {
             http_response_code(400);
             return 0;
         }
@@ -239,12 +245,12 @@ Route::add(
 
 Route::add(
     "/getTable",
-    function() {
+    function () {
         global $api;
         $numero = $_GET["num"];
-        if($numero) {
-            $res = $api->getTable($numero); 
-            if($res) {
+        if ($numero) {
+            $res = $api->getTable($numero);
+            if ($res) {
                 http_response_code(200);
                 return $res;
             }
@@ -255,12 +261,12 @@ Route::add(
 );
 
 Route::add(
-    "/getTables", 
-    function() {
+    "/getTables",
+    function () {
         global $api;
         $data = json_decode(file_get_contents('php://input'));
 
-        if($api->isValidPassword("Gestionnaire", $data->token)) {
+        if ($api->isValidPassword("Gestionnaire", $data->token)) {
             http_response_code(200);
             return $api->getTables();
         }
@@ -271,8 +277,8 @@ Route::add(
 );
 
 Route::add(
-    "/getTables", 
-    function() {
+    "/getTables",
+    function () {
         global $api;
         return $api->getTables();
     },
@@ -281,9 +287,9 @@ Route::add(
 
 Route::add(
     "/addTable",
-    function() {
+    function () {
         global $api;
-        if($api->addTable()) {
+        if ($api->addTable()) {
             return 1;
         }
         return 0;
@@ -293,14 +299,14 @@ Route::add(
 
 Route::add(
     "/updateTable",
-    function() {
+    function () {
         global $api;
         // check accessLevel = 0
         $result = $api->updateTable();
-        if($result) {
+        if ($result) {
             return 1;
         }
-    
+
         return null;
     },
     "post"
@@ -311,15 +317,15 @@ Route::add(
     function () {
         global $api;
         $result = $api->deleteTable();
-        if($result == -1) {
+        if ($result == -1) {
             http_response_code(400);
-            return json_encode("invalid token");         
-        } else if($result) {
+            return json_encode("invalid token");
+        } else if ($result) {
             http_response_code(200);
             return 1;
         }
         http_response_code(400);
-        return json_encode("already in command");         
+        return json_encode("already in command");
     },
     "post"
 );
@@ -328,7 +334,7 @@ Route::add(
 
 Route::add(
     "/getPass",
-    function() {
+    function () {
         global $api;
         return json_encode($api->getPass());
     },
@@ -337,10 +343,10 @@ Route::add(
 
 Route::add(
     "/getUser",
-    function() {
+    function () {
         global $api;
         $result = $api->authentificationUser();
-        if($result) {
+        if ($result) {
             return $result;
         }
         return null;
@@ -350,10 +356,10 @@ Route::add(
 
 Route::add(
     "/getUserAccessLevel",
-    function() {
+    function () {
         global $api;
         $result = $api->getUserAccessLevel();
-        if($result) {
+        if ($result) {
             return $result;
         }
         return null;
@@ -434,6 +440,4 @@ Route::methodNotAllowed(function () {
     echo "Cette méthode n'existe pas";
 });
 
-Route::run("/~paulhelleu/MiniProjet/index.php");
-
-?>
+Route::run("/foyerbdd");

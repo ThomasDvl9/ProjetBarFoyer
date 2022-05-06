@@ -1,43 +1,46 @@
 <?php
 
-  include "PHPMailer/src/PHPMailer.php";
-  include "PHPMailer/src/SMTP.php";
-  include "PHPMailer/src/Exception.php";
+use PHPMailer\PHPMailer\PHPMailer;
 
-  use PHPMailer\PHPMailer\PHPMailer;
-  use PHPMailer\PHPMailer\SMTP;
-  use PHPMailer\PHPMailer\Exception;
+function sendmail($mailAddress, $token)
+{
+  $name = "Commande Bar foyer - Institut lemonnier";
+  $to = $mailAddress;
+  $subject = "Validation de votre commande au bar";
+  $body = '<h3>Voici le lien pour valider votre commande : <a href="https://192.168.1.26:5500/commande.html?token=' . $token . '">lien de validation</a></h3>';
+  $from = "institutlemonniertestmailer@gmail.com";
+  $password = "Passwordgroupe6!";
 
+  require_once "./vendor/phpmailer/phpmailer/src/PHPMailer.php";
+  require_once "./vendor/phpmailer/phpmailer/src/SMTP.php";
+  require_once "./vendor/phpmailer/phpmailer/src/Exception.php";
   $mail = new PHPMailer();
 
   $mail->isSMTP();
-
+  // $mail->SMTPDebug = 3;                        
   $mail->Host = "smtp.gmail.com";
-
-  $mail->SMTPAuth = "true";
-
+  $mail->SMTPAuth = true;
+  $mail->Username = $from;
+  $mail->Password = $password;
+  $mail->Port = 587;
   $mail->SMTPSecure = "tls";
+  $mail->smtpConnect([
+    'ssl' => [
+      'verify_peer' => false,
+      'verify_peer_name' => false,
+      'allow_self_signed' => true
+    ]
+  ]);
 
-  $mail->Port = "587";
-
-  $mail->Username = "institutlemonniertestmailer@gmail.com";
-
-  $mail->Password = "Passwordgroupe6!";
-
-  $mail->Subject = "Test email PHPMailer";
-
-  $mail->setFrom("institutlemonniertestmailer@gmail.com");
-
-  $mail->Body = "Test contenu email commande !";
-
-  $mail->addAddress("institutlemonniertestmailer@gmail.com");
-
-  if($mail->send()) {
-    echo "Email envoyer !";
+  $mail->isHTML(true);
+  $mail->setFrom($from, $name);
+  $mail->addAddress($to);
+  $mail->Subject = ("$subject");
+  $mail->msgHTML($body);
+  $mail->Body = $body;
+  if ($mail->send()) {
+    echo "Email envoyer!";
   } else {
-    echo "Email non envoyer !";
+    echo "Une erreur c'est produite : " . $mail->ErrorInfo;
   }
-
-  $mail->smtpClose();
-
-?>
+}
