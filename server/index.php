@@ -181,18 +181,28 @@ Route::add(
     function () {
         global $api;
 
-        $id = $api->addCommand();
-        if (!$api->addCommandDetails($id)) {
+        $datas = $api->addCommand();
+
+        var_dump($datas);
+
+        if ($datas[0] == 0) {
+            http_response_code(400);
             return 0;
         }
 
-        $token = $api->createCommandToken($id);
+        if (!$api->addCommandDetails($datas[0])) {
+            return 0;
+        }
+
+        $token = $api->createCommandToken($datas[0]);
 
         if (!$token) {
             return 0;
         }
 
-        return json_encode($token);
+        sendmail($datas[1], $token);
+
+        return 0;
     },
     "post"
 );

@@ -70,25 +70,15 @@ const modal = (message) => {
   settingElement.className = 'setting';
   settingElement.innerHTML = `<h3>${message}</h3>`;
 
-  const btnCancel = document.createElement('a');
-  btnCancel.classList = 'btn btn-container btn-delete';
-  btnCancel.innerHTML = 'Annuler';
-
-  btnCancel.addEventListener('click', (e) => {
-    deleteElement();
-    console.log('Cancel');
-  });
-
   const btnConfirm = document.createElement('a');
   btnConfirm.classList = 'btn btn-container btn-validate';
-  btnConfirm.innerText = 'Confirmer';
+  btnConfirm.innerText = 'Continuer';
 
   btnConfirm.addEventListener('click', async (e) => {
-    console.log('Confirm');
-    location.href = 'http://192.168.1.26:5500/client/pages/commande.html';
+    location.href = '/client/pages';
   });
 
-  settingElement.append(btnCancel, btnConfirm);
+  settingElement.appendChild(btnConfirm);
   modalElement.appendChild(settingElement);
 
   modalElement.addEventListener('click', (e) => {
@@ -100,16 +90,16 @@ const modal = (message) => {
   document.body.appendChild(modalElement);
 };
 
-/* 
-  in  token : String
+/*
+  ASYNCHRONE
+  in
   ----
-  out undefined
+  out
   ----
-  but (créer un cookie "cmd-token")
+  but ()
 */
-const createCookie = (token) => {
-  document.cookie =
-    'cmd-token=' + token + '; expires=' + new Date(Date.now() + 1000 * 60 * 15).toGMTString();
+const sendMailCmdToken = async (token) => {
+  await fetchApiPost('');
 };
 
 /* 
@@ -172,9 +162,7 @@ const verifySubmit = (arr) => {
 
   btnSubmit.addEventListener('click', async () => {
     const email = document.querySelector('input[type="email"]').value;
-    const emailReg = new RegExp(
-      /[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-]+\.)+institutlemonnier.fr/,
-    );
+    // const emailReg = new RegExp(/[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-])+.institutlemonnier.fr/);
 
     const obj = {};
 
@@ -196,10 +184,10 @@ const verifySubmit = (arr) => {
       return 0;
     }
 
-    if (!emailReg.test(email)) {
-      statusElement.innerText = 'Email non valide !';
-      return 0;
-    }
+    // if (!emailReg.test(email)) {
+    //   statusElement.innerText = 'Email non valide !';
+    //   return 0;
+    // }
 
     await fetchApiPost('addCommandDetails', {
       productList: obj,
@@ -207,10 +195,6 @@ const verifySubmit = (arr) => {
       email,
     })
       .then((res) => {
-        if (res.status == 200) {
-          return res.json();
-        }
-
         if (res.status == 401) {
           statusElement.innerText =
             "Trop tard quelqu'un viens de commander un produit que vous avez choisi !";
@@ -223,10 +207,11 @@ const verifySubmit = (arr) => {
           fetchProduits();
           throw 'invalid request';
         }
+
+        return 1;
       })
-      .then((json) => {
-        createCookie(json);
-        modal('Confirmation de votre commande');
+      .then(() => {
+        modal('Confirmation de votre commande <br />Un email à été envoyé à ' + email);
 
         // propose redirection pour confirmation : mail -> commande.html?cmdid=token
       })

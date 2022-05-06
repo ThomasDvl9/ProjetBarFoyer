@@ -24,20 +24,18 @@ const fetchApiPost = (method, body) => {
   return content;
 };
 
-const checkTableValidation = async () => {
-  const cmdToken = Number(url.searchParams.get('token'));
-};
-
 const checkValidationToken = async () => {
-  const token = document.cookie.split('cmd-token=')[1];
-
+  const token = url.searchParams.get('token');
+  console.log(token);
   if (!token) {
+    location.href = '/client/pages/';
     return 0;
   }
 
   return await fetchApiPost('checkValidationTokenCommand', { token })
     .then((res) => {
       if (res.status == 400) {
+        location.href = '/client/pages/';
         return 0;
       }
       return res.json();
@@ -88,9 +86,9 @@ const displayCommand = async () => {
       <h3>${produitsList[detailsCommand.id_produit].denomination} x${
       detailsCommand.qt_commandee
     }</h3>
-      <p>Soit ${
-        Number(detailsCommand.qt_commandee) * Number(produitsList[detailsCommand.id_produit].prix)
-      } €</p>
+      <p>Soit ${Math.round(
+        Number(detailsCommand.qt_commandee) * Number(produitsList[detailsCommand.id_produit].prix),
+      )} €</p>
     `;
 
     commandElement.appendChild(element);

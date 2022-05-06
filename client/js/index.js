@@ -17,9 +17,7 @@ titleElements.forEach((element, index) => {
   });
 });
 
-const tablesTemplate = async () => {
-  const tables = await fetchApi('getTables');
-
+const tablesTemplate = (tables) => {
   const sortTables = tables.sort((a, b) => Number(a.numero) - Number(b.numero));
 
   const elements = sortTables.map((table) => {
@@ -36,4 +34,14 @@ const tablesTemplate = async () => {
   tablesElement.append(...elements);
 };
 
-tablesTemplate();
+const fetchTables = async () => {
+  const tables = await fetchApi('getTables');
+
+  if (tables == null) {
+    return 0;
+  }
+
+  tablesTemplate(tables);
+};
+
+fetchTables();

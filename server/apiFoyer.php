@@ -232,15 +232,18 @@ class API_Foyer
     $table = $datas->table;
 
     if ($date && $email) {
-      $this->PDO->query("INSERT INTO commandes 
+      try {
+        $this->PDO->query("INSERT INTO commandes 
           (id_table, email, confirmee, preparee, dateCommande) 
           VALUES ($table, '$email', 0, 0, '$date')");
+      } catch (Exception $err) {
+        return 0;
+      }
 
       http_response_code(200);
-      return $this->PDO->lastInsertId();
+      return array($this->PDO->lastInsertId(), $email);
     }
 
-    http_response_code(400);
     return 0;
   }
 
@@ -572,6 +575,19 @@ class API_Foyer
 
     return $this->createToken($cmdid, $validity_timer);
   }
+
+  // public function sendEmailCmdToken()
+  // {
+  //   $datas = json_decode(file_get_contents('php://input'));
+
+  //   $token = $datas->token;
+
+  //   sendmail();    
+
+  //   if (!$token) {
+  //     return 0;
+  //   }
+  // }
 
   public function decodeToken()
   {
