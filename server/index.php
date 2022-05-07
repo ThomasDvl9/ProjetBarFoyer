@@ -79,9 +79,11 @@ Route::add(
     function () {
         global $api;
         if ($api->updateProduct()) {
-            echo 1;
+            http_response_code(200);
+            return 1;
         } else {
-            echo 0;
+            http_response_code(400);
+            return 0;
         }
     },
     "post"
@@ -92,10 +94,11 @@ Route::add(
     function () {
         global $api;
         if ($api->addProduct()) {
-            echo 1;
-        } else {
-            echo 0;
+            http_response_code(200);
+            return 1;
         }
+        http_response_code(400);
+        return 0;
     },
     "post"
 );
@@ -148,7 +151,7 @@ Route::add(
         global $api;
         return $api->getAllDetailsCommandForCheckedCommand();
     },
-    "get"
+    "post"
 );
 
 // DETAIL_COMMANDES
@@ -191,12 +194,14 @@ Route::add(
         }
 
         if (!$api->addCommandDetails($datas[0])) {
+            http_response_code(400);
             return 0;
         }
 
         $token = $api->createCommandToken($datas[0]);
 
         if (!$token) {
+            http_response_code(400);
             return 0;
         }
 
@@ -300,8 +305,10 @@ Route::add(
     function () {
         global $api;
         if ($api->addTable()) {
+            http_response_code(200);
             return 1;
         }
+        http_response_code(400);
         return 0;
     },
     "post"

@@ -60,6 +60,7 @@ const modal = (message) => {
   const deleteElement = () => {
     modalElement.remove();
     document.body.classList.remove('rel');
+    location.href = '/client/pages';
   };
 
   const modalElement = document.createElement('div');
@@ -82,7 +83,7 @@ const modal = (message) => {
   modalElement.appendChild(settingElement);
 
   modalElement.addEventListener('click', (e) => {
-    if (e.target.classList[0] == 'modal') {
+    if (e.target == modalElement) {
       deleteElement(e);
     }
   });
@@ -162,7 +163,7 @@ const verifySubmit = (arr) => {
 
   btnSubmit.addEventListener('click', async () => {
     const email = document.querySelector('input[type="email"]').value;
-    // const emailReg = new RegExp(/[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-])+.institutlemonnier.fr/);
+    const emailReg = new RegExp(/[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-])+.institutlemonnier.fr/);
 
     const obj = {};
 
@@ -184,10 +185,10 @@ const verifySubmit = (arr) => {
       return 0;
     }
 
-    // if (!emailReg.test(email)) {
-    //   statusElement.innerText = 'Email non valide !';
-    //   return 0;
-    // }
+    if (!emailReg.test(email)) {
+      statusElement.innerText = 'Email non valide !';
+      return 0;
+    }
 
     await fetchApiPost('addCommandDetails', {
       productList: obj,
@@ -212,8 +213,6 @@ const verifySubmit = (arr) => {
       })
       .then(() => {
         modal('Confirmation de votre commande <br />Un email à été envoyé à ' + email);
-
-        // propose redirection pour confirmation : mail -> commande.html?cmdid=token
       })
       .catch((err) => {
         console.error('err : ', err);

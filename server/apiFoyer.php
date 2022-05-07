@@ -56,8 +56,12 @@ class API_Foyer
 
     foreach ($result as $id) {
       $pid = $id["id_produit"];
-      $productQuery = $this->PDO->query("SELECT * FROM produits WHERE id_produit = $pid");
-      $product = $productQuery->fetchAll(PDO::FETCH_ASSOC);
+      try {
+        $product = $this->PDO->query("SELECT * FROM produits WHERE id_produit = $pid")
+          ->fetchAll(PDO::FETCH_ASSOC);
+      } catch (Exception $err) {
+        return 0;
+      }
 
       array_push($productsTab, $product);
     }
@@ -78,16 +82,19 @@ class API_Foyer
     $token = $datas->token;
 
     if (!$this->isValidPassword("Gestionnaire", $token)) {
-      http_response_code(400);
       return 0;
     }
 
+    $this->createPass();
+
     if ($id && $nom && $prix && $quantite && $peremption && $illustration) {
-      $this->PDO->query("UPDATE produits SET denomination = '$nom', qt_dispo = $quantite, prix = $prix, peremption = '$peremption', illustration = '$illustration' WHERE id_produit = $id");
-      http_response_code(200);
+      try {
+        $this->PDO->query("UPDATE produits SET denomination = '$nom', qt_dispo = $quantite, prix = $prix, peremption = '$peremption', illustration = '$illustration' WHERE id_produit = $id");
+      } catch (Exception $err) {
+        return 0;
+      }
       return 1;
     } else {
-      http_response_code(400);
       return 0;
     }
   }
@@ -104,24 +111,31 @@ class API_Foyer
     $password = $data->token;
 
     if (!$this->isValidPassword("Gestionnaire", $password)) {
-      http_response_code(400);
       return 0;
     }
 
+    $this->createPass();
+
     if ($nom && $prix && $quantite && $peremption && $illustration) {
-      $this->PDO->exec("INSERT INTO produits (denomination, prix, qt_dispo, peremption, illustration) 
-          VALUES ('$nom', $prix, $quantite, '$peremption', '$illustration')");
-      http_response_code(200);
+      try {
+        $this->PDO->exec("INSERT INTO produits (denomination, prix, qt_dispo, peremption, illustration) 
+            VALUES ('$nom', $prix, $quantite, '$peremption', '$illustration')");
+      } catch (Exception $err) {
+        return 0;
+      }
       return 1;
     }
 
-    http_response_code(400);
     return 0;
   }
 
   public function commandProductFromCommand($cmdid)
   {
-    $commandeDetails = $this->PDO->query("SELECT id_produit, qt_commandee FROM detail_commandes WHERE id_commande = $cmdid")->fetchAll(PDO::FETCH_ASSOC);
+    try {
+      $commandeDetails = $this->PDO->query("SELECT id_produit, qt_commandee FROM detail_commandes WHERE id_commande = $cmdid")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     if (!$commandeDetails) {
       http_response_code(400);
@@ -131,7 +145,12 @@ class API_Foyer
     foreach ($commandeDetails as $commandeDetail) {
       $pid = $commandeDetail["id_produit"];
       $qt = $commandeDetail["qt_commandee"];
-      $qtProduit = $this->PDO->query("SELECT qt_dispo FROM produits WHERE id_produit = $pid")->fetchAll(PDO::FETCH_ASSOC);
+
+      try {
+        $qtProduit = $this->PDO->query("SELECT qt_dispo FROM produits WHERE id_produit = $pid")->fetchAll(PDO::FETCH_ASSOC);
+      } catch (Exception $err) {
+        return 0;
+      }
 
       if (!$qtProduit) {
         http_response_code(400);
@@ -147,7 +166,12 @@ class API_Foyer
     foreach ($commandeDetails as $commandeDetail) {
       $pid = $commandeDetail["id_produit"];
       $qt = $commandeDetail["qt_commandee"];
-      $this->PDO->exec("UPDATE produits SET qt_dispo = qt_dispo - $qt WHERE id_produit = $pid");
+
+      try {
+        $this->PDO->exec("UPDATE produits SET qt_dispo = qt_dispo - $qt WHERE id_produit = $pid");
+      } catch (Exception $err) {
+        return 0;
+      }
     }
 
     http_response_code(200);
@@ -166,8 +190,15 @@ class API_Foyer
       return -1;
     }
 
+    $this->createPass();
+
     if ($id) {
-      return $this->PDO->exec("DELETE FROM produits WHERE id_produit = $id");
+      try {
+        $this->PDO->exec("DELETE FROM produits WHERE id_produit = $id");
+      } catch (Exception $err) {
+        return 0;
+      }
+      return 1;
     }
 
     http_response_code(400);
@@ -178,44 +209,76 @@ class API_Foyer
 
   public function getCommandById($cmdid)
   {
-    $objPDOStatement = $this->PDO->query("SELECT * FROM commandes WHERE id_commande = $cmdid");
-
-    $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+    try {
+      $result = $this->PDO->query("SELECT * FROM commandes WHERE id_commande = $cmdid")
+        ->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
   }
 
   public function getPendingOrders()
   {
-    $objPDOStatement = $this->PDO->query("SELECT * FROM commandes");
-
-    $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+    try {
+      $result = $this->PDO->query("SELECT * FROM commandes")
+        ->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
   }
 
   public function getAllDetailsCommandForCheckedCommand()
   {
-    $commandes = $this->PDO->query("SELECT * FROM commandes WHERE confirmee = 1 AND preparee = 0")
-      ->fetchAll(PDO::FETCH_ASSOC);
+    $data = json_decode(file_get_contents('php://input'));
+
+    $token = $data->token;
+
+    if (!($this->isValidPassword("Barman", $token) || $this->isValidPassword("Gestionnaire", $token))) {
+      return 0;
+    }
+
+    $this->createPass();
+
+    try {
+      $commandes = $this->PDO->query("SELECT * FROM commandes WHERE confirmee = 1 AND preparee = 0")
+        ->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     $tables = array();
     $commandesDetails = array();
 
     foreach ($commandes as $commande) {
       $tableid = $commande["id_table"];
-      $table = $this->PDO->query("SELECT numero FROM tables WHERE id_table = $tableid")
-        ->fetchAll(PDO::FETCH_ASSOC);
+      try {
+        $table = $this->PDO->query("SELECT numero FROM tables WHERE id_table = $tableid")
+          ->fetchAll(PDO::FETCH_ASSOC);
+      } catch (Exception $err) {
+        return 0;
+      }
       array_push($tables, $table[0]["numero"]);
 
       $cmdid = $commande["id_commande"];
-      $commandeDetails = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $cmdid")
-        ->fetchAll(PDO::FETCH_ASSOC);
+      try {
+        $commandeDetails = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $cmdid")
+          ->fetchAll(PDO::FETCH_ASSOC);
+      } catch (Exception $err) {
+        return 0;
+      }
       array_push($commandesDetails, $commandeDetails);
     }
 
-    $produits = $this->PDO->query("SELECT * FROM produits")
-      ->fetchAll(PDO::FETCH_ASSOC);
+    try {
+      $produits = $this->PDO->query("SELECT * FROM produits")
+        ->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     $result = array();
     array_push($result, $commandes, $tables, $commandesDetails, $produits);
@@ -277,6 +340,8 @@ class API_Foyer
       return 0;
     }
 
+    $this->createPass();
+
     try {
       $query = $this->PDO->query("UPDATE commandes SET preparee = '1' WHERE id_commande = $id");
     } catch (Exception $err) {
@@ -294,17 +359,24 @@ class API_Foyer
 
   public function getCommandsDetails()
   {
-    $objPDOStatement = $this->PDO->query("SELECT * FROM detail_commandes");
-
-    $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+    try {
+      $result = $this->PDO->query("SELECT * FROM detail_commandes")
+        ->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
   }
 
   public function getCommandDetailByCommandId($id)
   {
-    $result = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $id")
-      ->fetchAll(PDO::FETCH_ASSOC);
+    try {
+      $result = $this->PDO->query("SELECT * FROM detail_commandes WHERE id_commande = $id")
+        ->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
   }
@@ -328,9 +400,13 @@ class API_Foyer
     }
 
     foreach ($productList as $id => $qt) {
-      $this->PDO->exec("INSERT INTO detail_commandes 
-          (id_commande, id_produit, qt_commandee, cochee) 
-          VALUES ($cmdid, $id, $qt, 0)");
+      try {
+        $this->PDO->exec("INSERT INTO detail_commandes 
+            (id_commande, id_produit, qt_commandee, cochee) 
+            VALUES ($cmdid, $id, $qt, 0)");
+      } catch (Exception $err) {
+        return 0;
+      }
     }
 
     http_response_code(200);
@@ -352,6 +428,8 @@ class API_Foyer
       return 0;
     }
 
+    $this->createPass();
+
     try {
       $query = $this->PDO->query("UPDATE detail_commandes SET cochee = '1' WHERE id_detail = $id");
     } catch (Exception $err) {
@@ -369,9 +447,12 @@ class API_Foyer
 
   public function getTable($numero)
   {
-    $objPDOStatement = $this->PDO->query("SELECT * FROM tables WHERE numero = $numero");
-
-    $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+    try {
+      $result = $this->PDO->query("SELECT * FROM tables WHERE numero = $numero")
+        ->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     if ($result) {
       return json_encode($result, JSON_UNESCAPED_UNICODE);
@@ -382,9 +463,12 @@ class API_Foyer
 
   public function getTables()
   {
-    $objPDOStatement = $this->PDO->query("SELECT * FROM tables");
-
-    $result = $objPDOStatement->fetchAll(PDO::FETCH_ASSOC);
+    try {
+      $result = $this->PDO->query("SELECT * FROM tables")
+        ->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
   }
@@ -398,19 +482,24 @@ class API_Foyer
     $token = $datas->token;
 
     if (!$this->isValidPassword("Gestionnaire", $token)) {
-      http_response_code(400);
       return 0;
     }
 
+    $this->createPass();
+
     if ($num && $lien) {
-      $objPDOStatement = $this->PDO->exec("INSERT INTO tables (numero, lien_QRcode) VALUES ($num, $lien)");
-      if ($objPDOStatement) {
-        http_response_code(200);
+      try {
+        $addTable = $this->PDO->exec("INSERT INTO tables (numero, lien_QRcode) VALUES ($num, $lien)");
+      } catch (Exception $err) {
+        return 0;
+      }
+      if ($addTable) {
         return 1;
       }
+
+      return 0;
     }
 
-    http_response_code(400);
     return 0;
   }
 
@@ -427,6 +516,8 @@ class API_Foyer
       http_response_code(400);
       return 0;
     }
+
+    $this->createPass();
 
     if ($id && $num != '' && $lien != '') {
       try {
@@ -450,15 +541,19 @@ class API_Foyer
     $token = $datas->token;
 
     if (!$this->isValidPassword("Gestionnaire", $token)) {
-      http_response_code(400);
       return -1;
     }
 
+    $this->createPass();
+
     if ($id) {
-      return $this->PDO->query("DELETE FROM tables WHERE id_table = $id");
+      try {
+        $this->PDO->query("DELETE FROM tables WHERE id_table = $id");
+      } catch (Exception $err) {
+        return 0;
+      }
     }
 
-    http_response_code(400);
     return json_encode("Data no valid");
   }
 
@@ -467,7 +562,11 @@ class API_Foyer
   public function createPass()
   {
     $pass = base64_encode(random_bytes(150));
-    $query = $this->PDO->query("UPDATE pass SET passcode = '$pass' WHERE id = 1");
+    try {
+      $query = $this->PDO->query("UPDATE pass SET passcode = '$pass' WHERE id = 1");
+    } catch (Exception $err) {
+      return 0;
+    }
     if ($query) {
       return $pass;
     }
@@ -518,9 +617,15 @@ class API_Foyer
       return 0;
     }
 
+    $this->createPass();
+
     if ($id) {
-      $result = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id'")
-        ->fetchAll(PDO::FETCH_ASSOC);
+      try {
+        $result = $this->PDO->query("SELECT accessLevel FROM users WHERE _login = '$id'")
+          ->fetchAll(PDO::FETCH_ASSOC);
+      } catch (Exception $err) {
+        return 0;
+      }
 
       $this->createPass();
 
@@ -537,8 +642,12 @@ class API_Foyer
     $uid = $data->uid;
 
     if ($uid) {
-      $result = $this->PDO->query("SELECT accessLevel FROM users WHERE id_user = '$uid'")
-        ->fetchAll(PDO::FETCH_ASSOC);
+      try {
+        $result = $this->PDO->query("SELECT accessLevel FROM users WHERE id_user = '$uid'")
+          ->fetchAll(PDO::FETCH_ASSOC);
+      } catch (Exception $err) {
+        return 0;
+      }
 
       return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
     }
@@ -566,12 +675,17 @@ class API_Foyer
 
   public function createCommandToken($cmdid)
   {
-    $command = $this->commandProductFromCommand($cmdid);
-    $validity_timer = time() + 60 * MINUTES_CMD;
+    try {
+      $command = $this->commandProductFromCommand($cmdid);
+    } catch (Exception $err) {
+      return 0;
+    }
 
     if (!$command) {
       return 0;
     }
+
+    $validity_timer = time() + 60 * MINUTES_CMD;
 
     return $this->createToken($cmdid, $validity_timer);
   }

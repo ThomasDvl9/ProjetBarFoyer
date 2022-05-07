@@ -340,7 +340,11 @@ const commandesTemplate = (commandes) => {
 };
 
 const fetchCommandes = async () => {
-  const commandes = await fetchApiToJson('getAllDetailsCommandForCheckedCommand');
+  const commandes = await fetchApiPost('getAllDetailsCommandForCheckedCommand')
+    .then((res) => res.json())
+    .catch((err) => {
+      alert('Mot de passe non valide !');
+    });
 
   if (commandes === null) {
     return 0;
@@ -354,4 +358,6 @@ const fetchCommandes = async () => {
   commandesTemplate(commandes);
 };
 
-fetchCommandes();
+validateBtn.addEventListener('click', (e) => {
+  fetchCommandes();
+});
