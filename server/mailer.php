@@ -38,9 +38,4 @@ function sendmail($mailAddress, $token)
   $mail->Subject = ("$subject");
   $mail->msgHTML($body);
   $mail->Body = $body;
-  if ($mail->send()) {
-    echo "Email envoyer!";
-  } else {
-    echo "Une erreur c'est produite : " . $mail->ErrorInfo;
-  }
 }

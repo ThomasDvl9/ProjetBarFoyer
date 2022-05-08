@@ -23,7 +23,7 @@ let table = null;
   but (parser le JSON pour le convertir en JS)
 */
 const fetchApiToJson = (method) => {
-  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + method)
+  const content = fetch('http://172.20.10.7:8080/foyerbdd/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -39,7 +39,7 @@ const fetchApiToJson = (method) => {
   but (renvoie status de la requête)
 */
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + method, {
+  const content = fetch('http://172.20.10.7:8080/foyerbdd/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -91,18 +91,6 @@ const modal = (message) => {
   document.body.appendChild(modalElement);
 };
 
-/*
-  ASYNCHRONE
-  in
-  ----
-  out
-  ----
-  but ()
-*/
-const sendMailCmdToken = async (token) => {
-  await fetchApiPost('');
-};
-
 /* 
   ASYNCHRONE
   in  undefined
@@ -117,7 +105,7 @@ const checkTableValidation = async () => {
   // condition si table n'existe pas
   const tab = await fetchApiToJson('getTable?num=' + numero);
   if (!(tab && tab.length)) {
-    location.href = 'http://192.168.1.26:5500/client/pages';
+    location.href = 'http://172.20.10.7:5500/client/pages';
   }
 
   table = tab[0].id_table;
@@ -157,13 +145,19 @@ const totalFeature = (arr) => {
   });
 };
 
+let validationClick = false;
+
 /*  */
 const verifySubmit = (arr) => {
   const btnSubmit = document.querySelector('a[type="button"]');
 
   btnSubmit.addEventListener('click', async () => {
+    if (validationClick) {
+      return 0;
+    }
+
     const email = document.querySelector('input[type="email"]').value;
-    const emailReg = new RegExp(/[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-])+.institutlemonnier.fr/);
+    // const emailReg = new RegExp(/[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-])+.institutlemonnier.fr/);
 
     const obj = {};
 
@@ -185,10 +179,12 @@ const verifySubmit = (arr) => {
       return 0;
     }
 
-    if (!emailReg.test(email)) {
-      statusElement.innerText = 'Email non valide !';
-      return 0;
-    }
+    // if (!emailReg.test(email)) {
+    //   statusElement.innerText = 'Email non valide !';
+    //   return 0;
+    // }
+
+    validationClick = true;
 
     await fetchApiPost('addCommandDetails', {
       productList: obj,

@@ -6,7 +6,7 @@ const url = new URL(location);
 let cmdId = null;
 
 const fetchApiToJson = (method) => {
-  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + method)
+  const content = fetch('http://172.20.10.7:8080/foyerbdd/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch((err) => null);
@@ -14,7 +14,7 @@ const fetchApiToJson = (method) => {
 };
 
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + method, {
+  const content = fetch('http://172.20.10.7:8080/foyerbdd/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

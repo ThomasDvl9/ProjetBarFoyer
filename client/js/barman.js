@@ -232,11 +232,11 @@ const MD5 = (string) => {
 //#endregion MD5
 
 const fetchApi = (method) => {
-  return fetch('http://192.168.1.26:8080/foyerbdd/' + method);
+  return fetch('http://10.100.1.216:8080/foyerbdd/' + method);
 };
 
 const fetchApiToJson = (method) => {
-  const produits = fetch('http://192.168.1.26:8080/foyerbdd/' + method)
+  const produits = fetch('http://10.100.1.216:8080/foyerbdd/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -247,7 +247,7 @@ const fetchApiPost = async (param, body) => {
   const pass = await fetchApiToJson('getPass');
   const token = MD5(MD5(passwordInp.value).toUpperCase() + pass);
 
-  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + param, {
+  const content = fetch('http://10.100.1.216:8080/foyerbdd/' + param, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -257,16 +257,7 @@ const fetchApiPost = async (param, body) => {
   return content;
 };
 
-let refresh = setInterval(() => {
-  fetchCommandes();
-}, 5000);
-
-document.addEventListener('mousemove', (e) => {
-  clearInterval(refresh);
-  refresh = setInterval(() => {
-    fetchCommandes();
-  }, 5000);
-});
+let result;
 
 const commandesTemplate = (commandes) => {
   const commandeTemplate = commandes[0].map((commande, index) => {
@@ -349,6 +340,11 @@ const fetchCommandes = async () => {
   if (commandes === null) {
     return 0;
   }
+
+  refresh = setInterval(() => {
+    clearInterval(refresh);
+    fetchCommandes();
+  }, 5000);
 
   if (!commandes[0].length || !commandes[1].length || !commandes[2].length) {
     sectionElement.innerHTML = "<h3>Aucune commandes n'as été faite !</h3>";
