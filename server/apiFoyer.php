@@ -24,7 +24,7 @@ class API_Foyer
     $date = date("Y-m-d");
 
     try {
-      $result = $this->PDO->query("SELECT * FROM produits WHERE qt_dispo > 0 AND peremption > $date")
+      $result = $this->PDO->query("SELECT * FROM produits WHERE qt_dispo > 0 AND peremption > '$date'")
         ->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $err) {
       $result = null;
