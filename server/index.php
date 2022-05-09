@@ -5,10 +5,10 @@ include "./apiFoyer.php";
 include "./mailer.php";
 header("Access-Control-Allow-Origin: *");
 
-$user = "paul";
-$mdp = "Password123!";
+$user = "groupe6";
+$mdp = "Password1234g6";
 $host = "localhost";
-$base = "foyerbdd";
+$base = "foyerbdd_g6";
 $api = new API_Foyer($base, $user, $mdp, $host);
 
 // ensemble des methodes GET
@@ -24,14 +24,13 @@ Route::add(
 // PRODUITS
 
 Route::add(
-    "/getAvailableProducts",
+    "/getProducts",
     function () {
         global $api;
-        $data = json_decode(file_get_contents('php://input'));
-
-        if ($api->isValidPassword("Gestionnaire", $data->token)) {
+        $products = $api->getProducts();
+        if($products) {
             http_response_code(200);
-            return $api->getAvailableProducts();
+            return $products;
         }
         http_response_code(400);
         return json_encode("invalid token");
@@ -384,69 +383,6 @@ Route::add(
     "post"
 );
 
-// Route::add(
-//     "/validateOrder",
-//     function () {
-//         global $api;
-//         echo $api->validateOrder();
-//     },
-//     "get"
-// );
-
-// Route::add(
-//     "/hasAccessLevel",
-//     function() {
-//         global $api;
-//         echo $api->hasAccessLevel();
-//     },
-//     "get"
-// );
-
-/*
-Route::add('/isAlreadyPreordered',function(){
-    global $api;
-    echo $api->isAlreadyPreordered();
-},'get');
-
-// ensemble des méthodes POST
-*/
-
-// Route::add(
-//     "/authentication",
-//     function () {
-//         global $api;
-//         header("Content-Type:application/json");
-//         echo $api->authentication();
-//     },
-//     "post"
-// );
-
-/*  
-Route::add('/order',function(){
-    global $api;
-    echo $api->order();
-},'post');
-*/
-
-// Route::add(
-//     "/preorder",
-//     function () {
-//         global $api;
-//         echo $api->preorder();
-//     },
-//     "post"
-// );
-
-/*
-// ensemble des methodes PUT
-
-Route::add('/orderReady',function(){
-    global $api;
-    echo $api->orderReady() ;
-},'put');
-
-*/
-
 // gestion des messages d'erreur
 
 Route::pathNotFound(function () {
@@ -457,4 +393,4 @@ Route::methodNotAllowed(function () {
     echo "Cette méthode n'existe pas";
 });
 
-Route::run("/foyerbdd");
+Route::run("/~paulhelleu/MiniProjet/index.php");

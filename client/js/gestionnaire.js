@@ -235,11 +235,11 @@ const MD5 = (string) => {
 //#endregion MD5
 
 const fetchApi = (param) => {
-  return fetch('http://192.168.1.26:8080/foyerbdd/' + param);
+  return fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param);
 };
 
 const fetchApiJson = (param) => {
-  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + param)
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -250,7 +250,7 @@ const fetchApiPost = async (param, body) => {
   const pass = await fetchApiJson('getPass');
   const token = MD5(MD5(passwordInp.value).toUpperCase() + pass);
 
-  const content = fetch('http://192.168.1.26:8080/foyerbdd/' + param, {
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -343,7 +343,7 @@ const modal = ({ message, state, method, id = null, datas = null }, fetchReq, cb
 };
 
 const produitsTemplate = async () => {
-  const produitsDispo = await fetchApiPost('getAvailableProducts')
+  const produitsDispo = await fetchApiPost('getProducts')
     .then((res) => res.json())
     .catch(() => null);
 

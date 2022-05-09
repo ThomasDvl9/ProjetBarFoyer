@@ -21,8 +21,10 @@ class API_Foyer
 
   public function getAvailableProducts()
   {
+    $date = date("Y-m-d");
+
     try {
-      $result = $this->PDO->query("SELECT * FROM produits")
+      $result = $this->PDO->query("SELECT * FROM produits WHERE qt_dispo > 0 AND peremption > $date")
         ->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $err) {
       $result = null;
@@ -38,6 +40,27 @@ class API_Foyer
         ->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $err) {
       $result = null;
+    }
+
+    return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
+  }
+
+  public function getProducts() {
+    $data = json_decode(file_get_contents('php://input'));
+
+    $token = $data->token;
+
+    if (!$this->isValidPassword("Gestionnaire", $token)) {
+      return 0;
+    }
+
+    $this->createPass();
+
+    try {
+      $result = $this->PDO->query("SELECT * from produits")
+      ->fetchAll(PDO::FETCH_ASSOC);
+    } catch(Exception $err) {
+      return 0;
     }
 
     return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
@@ -489,12 +512,10 @@ class API_Foyer
 
     if ($num && $lien) {
       try {
-        $addTable = $this->PDO->exec("INSERT INTO tables (numero, lien_QRcode) VALUES ($num, $lien)");
+        $this->PDO->exec("INSERT INTO tables (numero, lien_QRcode) VALUES ($num, '$lien')");
+        return 1;
       } catch (Exception $err) {
         return 0;
-      }
-      if ($addTable) {
-        return 1;
       }
 
       return 0;

@@ -1,5 +1,6 @@
-// info: cookie minutes timer 105/77
+// info: minuteur token 105/77
 
+/* éléments DOM */
 const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
 const totalElement = document.getElementById('total');
@@ -23,7 +24,7 @@ let table = null;
   but (parser le JSON pour le convertir en JS)
 */
 const fetchApiToJson = (method) => {
-  const content = fetch('http://172.20.10.7:8080/foyerbdd/' + method)
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -39,7 +40,7 @@ const fetchApiToJson = (method) => {
   but (renvoie status de la requête)
 */
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://172.20.10.7:8080/foyerbdd/' + method, {
+  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -97,7 +98,7 @@ const modal = (message) => {
   ----
   out undefined
   ----
-  but (vérifier si la table existe bien)
+  but (vérifier si numéro table existe bien)
 */
 const checkTableValidation = async () => {
   const numero = Number(url.searchParams.get('table'));
@@ -105,14 +106,20 @@ const checkTableValidation = async () => {
   // condition si table n'existe pas
   const tab = await fetchApiToJson('getTable?num=' + numero);
   if (!(tab && tab.length)) {
-    location.href = 'http://172.20.10.7:5500/client/pages';
+    location.href = 'http://172.16.40.94:5500/client/pages';
   }
 
   table = tab[0].id_table;
   h3.innerHTML = 'Vous êtes à la table ' + numero;
 };
 
-/*  */
+/*  
+  in  Array<Object> filtreProduits
+  ----
+  out undefined
+  ----
+  but (calculer le prix total des produits selectionnés et vérifier nombre entier)
+*/
 const totalFeature = (arr) => {
   quantiteInp.forEach((inp) => {
     inp.addEventListener('change', () => {
@@ -147,7 +154,13 @@ const totalFeature = (arr) => {
 
 let validationClick = false;
 
-/*  */
+/* 
+  in
+  ----
+  out
+  ----
+  but
+*/
 const verifySubmit = (arr) => {
   const btnSubmit = document.querySelector('a[type="button"]');
 

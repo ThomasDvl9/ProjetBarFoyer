@@ -3,7 +3,7 @@ const contentElements = document.querySelectorAll('.content');
 const tablesElement = document.getElementById('tables');
 
 const fetchApi = (param) => {
-  const produits = fetch('http://192.168.1.26:8080/foyerbdd/' + param)
+  const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -25,7 +25,7 @@ const tablesTemplate = (tables) => {
     element.innerHTML = '<i class="fa-solid fa-qrcode"></i> <h4>' + table.numero + '</h4>';
 
     element.addEventListener('click', (e) => {
-      location.href = 'http://192.168.1.26:5500/client/pages/client.html?table=' + table.numero;
+      location.href = 'http://172.16.40.94:5500/client/pages/client.html?table=' + table.numero;
     });
 
     return element;

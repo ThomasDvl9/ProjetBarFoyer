@@ -102,8 +102,16 @@ header {
     @include large {
       width: 90%;
     }
+    > a {
+      margin-top: 2rem;
+    }
     @include medium {
+      justify-content: space-around;
       width: 95%;
+      > a {
+        margin-left: 4rem;
+        margin-top: 0;
+      }
     }
     height: 100%;
     display: flex;
