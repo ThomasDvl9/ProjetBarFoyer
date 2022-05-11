@@ -1,7 +1,6 @@
 <?php
 
 define("MINUTES_CMD", 15);
-define("MINUTES_AUTH", 90);
 
 class API_Foyer
 {
