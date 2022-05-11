@@ -316,13 +316,13 @@ Route::add(
 Route::add(
     "/updateTable",
     function () {
-        global $api;
-        // check accessLevel = 0
+        global $api; 
         $result = $api->updateTable();
         if ($result) {
+            http_response_code(200);
             return 1;
         }
-
+        http_response_code(400);
         return null;
     },
     "post"

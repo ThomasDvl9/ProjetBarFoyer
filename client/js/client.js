@@ -1,6 +1,4 @@
-// info: minuteur token 105/77
-
-/* éléments DOM */
+// éléments DOM
 const sectionElement = document.querySelector('section');
 const h3 = document.querySelector('h3');
 const totalElement = document.getElementById('total');
@@ -114,7 +112,7 @@ const checkTableValidation = async () => {
 };
 
 /*  
-  in  Array<Object> filtreProduits
+  in  filtreProduits : Array<Object>
   ----
   out undefined
   ----
@@ -152,14 +150,15 @@ const totalFeature = (arr) => {
   });
 };
 
+/* Empèche le double envoie de commande */
 let validationClick = false;
 
 /* 
-  in
+  in  filtreProduits : Array<Object>
   ----
-  out
+  out undefined
   ----
-  but
+  but (vérifier si les informations entrées sont valides)
 */
 const verifySubmit = (arr) => {
   const btnSubmit = document.querySelector('a[type="button"]');
@@ -170,7 +169,7 @@ const verifySubmit = (arr) => {
     }
 
     const email = document.querySelector('input[type="email"]').value;
-    // const emailReg = new RegExp(/[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-])+.institutlemonnier.fr/);
+    const emailReg = new RegExp(/[\w+&*-]+(?:\.[\w+&*-]+)*@(?:[a-zA-Z0-9-])+.institutlemonnier.fr/);
 
     const obj = {};
 
@@ -192,10 +191,10 @@ const verifySubmit = (arr) => {
       return 0;
     }
 
-    // if (!emailReg.test(email)) {
-    //   statusElement.innerText = 'Email non valide !';
-    //   return 0;
-    // }
+    if (!emailReg.test(email)) {
+      statusElement.innerText = 'Email non valide !';
+      return 0;
+    }
 
     validationClick = true;
 
@@ -214,7 +213,6 @@ const verifySubmit = (arr) => {
 
         if (res.status == 400) {
           statusElement.innerText = 'Données envoyés non valides !';
-          fetchProduits();
           throw 'invalid request';
         }
 
@@ -233,22 +231,19 @@ const verifySubmit = (arr) => {
   ASYNCHRONE
   in  produitsDispo : Array<Object>
   ----
-  out 
+  out undefined
   ----
-  but
- */
+  but (appelez les fonctions pour afficher les produits, calculer le total et vérifier si les données entrés sont valides)
+*/
 const produitsTemplate = (produitsDispo) => {
-  /*  */
-  const filtreProduits = produitsDispo.filter((produit) => {
-    const datePeremption = produit.peremption.split('-');
-    const dateProduit = new Date(datePeremption[0], datePeremption[1], datePeremption[2]).getTime();
-
-    // filtre produit périmer et quantite
-    return Date.now() < dateProduit && Number(produit.qt_dispo);
-  });
-
-  /*  */
-  const produitsMap = filtreProduits.map((produit) => {
+  /*
+    in  produitsDispo : Array<Object>
+    ----
+    out HTMLCollection<articleElement>
+    ----
+    but (créer un tableau d'éléments HTML pour afficher les produits disponibles et ajouter la quantité du produit dans le tableau qt)
+  */
+  const produitsMap = produitsDispo.map((produit) => {
     const article = document.createElement('article');
     article.classList = 'products';
     article.innerHTML = `
@@ -284,8 +279,8 @@ const produitsTemplate = (produitsDispo) => {
 
   quantiteInp = document.querySelectorAll('input[name="quantite"]');
 
-  totalFeature(filtreProduits);
-  verifySubmit(filtreProduits);
+  totalFeature(produitsDispo);
+  verifySubmit(produitsDispo);
 };
 
 /* 
@@ -306,7 +301,9 @@ const fetchProduits = async () => {
   produitsTemplate(produitsDispo);
 };
 
-/*  */
+/* 
+  fonction au lancement de la page pour vérifier si la table est enregistrée
+*/
 (async () => {
   await checkTableValidation();
   fetchProduits();

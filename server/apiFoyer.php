@@ -534,7 +534,6 @@ class API_Foyer
     $token = $datas->token;
 
     if (!$this->isValidPassword("Gestionnaire", $token)) {
-      http_response_code(400);
       return 0;
     }
 
@@ -546,11 +545,9 @@ class API_Foyer
       } catch (Exception $err) {
         return 0;
       }
-      http_response_code(200);
       return 1;
     }
 
-    http_response_code(400);
     return 0;
   }
 
@@ -678,7 +675,6 @@ class API_Foyer
 
   public function createToken($id, $validity_timer)
   {
-    // if pass est le meme
     $content = $id . "." . $validity_timer;
 
     $encrypt_method = "AES-256-CBC";
@@ -710,19 +706,6 @@ class API_Foyer
 
     return $this->createToken($cmdid, $validity_timer);
   }
-
-  // public function sendEmailCmdToken()
-  // {
-  //   $datas = json_decode(file_get_contents('php://input'));
-
-  //   $token = $datas->token;
-
-  //   sendmail();    
-
-  //   if (!$token) {
-  //     return 0;
-  //   }
-  // }
 
   public function decodeToken()
   {
@@ -767,6 +750,4 @@ class API_Foyer
     $this->confirmcommand($cmdid);
     return $cmdid;
   }
-
-  // check access level middleware
 }
