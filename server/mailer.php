@@ -7,7 +7,7 @@ function sendmail($mailAddress, $token)
   $name = "Commande Bar foyer - Institut lemonnier";
   $to = $mailAddress;
   $subject = "Validation de votre commande au bar";
-  $body = '<h3>Voici le lien pour valider votre commande : <a href="http://172.16.40.94:5500/client/pages/commande.html?token=' . $token . '">lien de validation</a></h3>';
+  $body = '<h3>Voici le lien pour valider votre commande : <a href="http://172.20.10.7:5500/client/pages/commande.html?token=' . $token . '">lien de validation</a></h3>';
   $from = "institutlemonniertestmailer@gmail.com";
   $password = "Passwordgroupe6!";
 
@@ -38,4 +38,5 @@ function sendmail($mailAddress, $token)
   $mail->Subject = ("$subject");
   $mail->msgHTML($body);
   $mail->Body = $body;
+  $mail->send();
 }

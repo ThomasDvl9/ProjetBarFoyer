@@ -232,11 +232,11 @@ const MD5 = (string) => {
 //#endregion MD5
 
 const fetchApi = (method) => {
-  return fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method);
+  return fetch('http://172.20.10.7:8080/foyerbdd/' + method);
 };
 
 const fetchApiToJson = (method) => {
-  const produits = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
+  const produits = fetch('http://172.20.10.7:8080/foyerbdd/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -247,7 +247,7 @@ const fetchApiPost = async (param, body) => {
   const pass = await fetchApiToJson('getPass');
   const token = MD5(MD5(passwordInp.value).toUpperCase() + pass);
 
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + param, {
+  const content = fetch('http://172.20.10.7:8080/foyerbdd/' + param, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

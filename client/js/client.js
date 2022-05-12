@@ -22,7 +22,7 @@ let table = null;
   but (parser le JSON pour le convertir en JS)
 */
 const fetchApiToJson = (method) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method)
+  const content = fetch('http://172.20.10.7:8080/foyerbdd/' + method)
     .then((res) => res.json())
     .then((json) => json)
     .catch(() => null);
@@ -38,7 +38,7 @@ const fetchApiToJson = (method) => {
   but (renvoie status de la requête)
 */
 const fetchApiPost = (method, body) => {
-  const content = fetch('http://172.19.32.3/~paulhelleu/MiniProjet/index.php/' + method, {
+  const content = fetch('http://172.20.10.7:8080/foyerbdd/' + method, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',

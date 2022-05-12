@@ -5,10 +5,10 @@ include "./apiFoyer.php";
 include "./mailer.php";
 header("Access-Control-Allow-Origin: *");
 
-$user = "groupe6";
-$mdp = "Password1234g6";
+$user = "paul";
+$mdp = "Password123!";
 $host = "localhost";
-$base = "foyerbdd_g6";
+$base = "foyerbdd";
 $api = new API_Foyer($base, $user, $mdp, $host);
 
 // ensemble des methodes GET
@@ -28,7 +28,7 @@ Route::add(
     function () {
         global $api;
         $products = $api->getProducts();
-        if($products) {
+        if ($products) {
             http_response_code(200);
             return $products;
         }
@@ -204,6 +204,8 @@ Route::add(
             return 0;
         }
 
+        echo $datas[1] . $token;
+
         sendmail($datas[1], $token);
 
         return 0;
@@ -316,7 +318,7 @@ Route::add(
 Route::add(
     "/updateTable",
     function () {
-        global $api; 
+        global $api;
         $result = $api->updateTable();
         if ($result) {
             http_response_code(200);
@@ -393,4 +395,4 @@ Route::methodNotAllowed(function () {
     echo "Cette méthode n'existe pas";
 });
 
-Route::run("/~paulhelleu/MiniProjet/index.php");
+Route::run("/foyerbdd");
