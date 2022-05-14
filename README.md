@@ -34,12 +34,12 @@
 
 ### NPM
 
-- **cd client**
-- **npm i**
-- **npm start**
-- Sauvegarder un fichier dépendant des fichiers SCSS ex: _bases.scss
+- `cd client`
+- `npm i`
+- `npm start`
+- Sauvegarder un fichier dépendant des fichiers SCSS ex: **_bases.scss**
 
 ### COMPOSER
 
-- **cd server**
-- **composer install**
+- `cd server`
+- `composer install`
