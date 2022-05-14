@@ -26,3 +26,20 @@
 - **Gérer les tables**
 
 > Requêtes restapi
+
+
+## Installation des dépendances
+
+> Assurez-vous d'avoir installer le gestionnaire de packets NPM et COMPOSER
+
+### NPM
+
+- **cd client**
+- **npm i**
+- **npm start**
+- Sauvegarder un fichier dépendant des fichiers SCSS ex: _bases.scss
+
+### COMPOSER
+
+- **cd server**
+- **composer install**
