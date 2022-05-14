@@ -44,7 +44,8 @@ class API_Foyer
     return json_encode($result ? $result : null, JSON_UNESCAPED_UNICODE);
   }
 
-  public function getProducts() {
+  public function getProducts()
+  {
     $data = json_decode(file_get_contents('php://input'));
 
     $token = $data->token;
@@ -57,8 +58,8 @@ class API_Foyer
 
     try {
       $result = $this->PDO->query("SELECT * from produits")
-      ->fetchAll(PDO::FETCH_ASSOC);
-    } catch(Exception $err) {
+        ->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $err) {
       return 0;
     }
 
