@@ -127,7 +127,7 @@ Route::add(
     "/getPendingOrders",
     function () {
         global $api;
-        echo $api->getPendingOrders();
+        return $api->getPendingOrders();
     },
     "get"
 );
@@ -159,7 +159,7 @@ Route::add(
     "/getCommandsDetails",
     function () {
         global $api;
-        echo $api->getCommandsDetails();
+        return $api->getCommandsDetails();
     },
     "get"
 );
@@ -185,8 +185,6 @@ Route::add(
 
         $datas = $api->addCommand();
 
-        var_dump($datas);
-
         if ($datas[0] == 0) {
             http_response_code(400);
             return 0;
@@ -203,8 +201,6 @@ Route::add(
             http_response_code(400);
             return 0;
         }
-
-        echo $datas[1] . $token;
 
         sendmail($datas[1], $token);
 
@@ -388,11 +384,11 @@ Route::add(
 // gestion des messages d'erreur
 
 Route::pathNotFound(function () {
-    echo "Ce chemin n'existe pas";
+    return "Ce chemin n'existe pas";
 });
 
 Route::methodNotAllowed(function () {
-    echo "Cette méthode n'existe pas";
+    return "Cette méthode n'existe pas";
 });
 
 Route::run("/foyerbdd");

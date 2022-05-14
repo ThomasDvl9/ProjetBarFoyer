@@ -17,7 +17,7 @@ let table = null;
 /* 
   in  method : string (méthode GET)
   ----
-  out Array<Object>
+  out Promise || null
   ----
   but (parser le JSON pour le convertir en JS)
 */

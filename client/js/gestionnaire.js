@@ -355,7 +355,10 @@ const produitsTemplate = async () => {
     const article = document.createElement('article');
     article.setAttribute('produit-id', produit.id_produit);
 
-    if (isPerimer(produit.peremption)) {
+    if (produit.qt_dispo == 0) {
+      article.className = 'orange';
+      article.innerHTML = '<h4>Stock épuisé</h4>';
+    } else if (isPerimer(produit.peremption)) {
       article.className = 'red';
       article.innerHTML = '<h4>Produit périmé</h4>';
     }
@@ -422,42 +425,32 @@ const produitsTemplate = async () => {
         `article[produit-id="${btn.getAttribute('produit-id')}"] input[name="illustration"]`,
       ).value;
 
-      if (!isPerimer(peremptionInp)) {
-        modal(
-          {
-            message: 'Modification de : ' + produitsDispo[index].denomination,
-            state: '',
-            method: 'updateProduct',
-            datas: {
-              id: e.target.getAttribute('produit-id'),
-              nom: denominationInp,
-              prix: prixInp,
-              quantite: quantiteInp,
-              peremption: peremptionInp,
-              illustration: illustrationInp,
-            },
-          },
-          fetchApiPost,
-          produitsTemplate,
-        );
-        /*  await fetchApiPost('updateProduct', {
-          id: e.target.getAttribute('produit-id'),
-          nom: denominationInp.value,
-          prix: prixInp.value,
-          quantite: quantiteInp.value,
-          peremption: peremptionInp.value,
-          illustration: illustrationInp.value,
-        })
-          .then((res) => {
-            res.status;
-          })
-          .then(() => {
-            produitsTemplate();
-          })
-          .catch((err) => console.error(err)); */
-      } else {
-        alert('Date de péremption non valide !');
+      if (isPerimer(peremptionInp)) {
+        alert('Date de péremption non valide');
+        return 0;
       }
+
+      if (Number(quantiteInp) <= 0) {
+        alert('Quantité entrée non valide !');
+        return 0;
+      }
+
+      modal(
+        {
+          message: 'Modification de : ' + produitsDispo[index].denomination,
+          method: 'updateProduct',
+          datas: {
+            id: e.target.getAttribute('produit-id'),
+            nom: denominationInp,
+            prix: prixInp,
+            quantite: quantiteInp,
+            peremption: peremptionInp,
+            illustration: illustrationInp,
+          },
+        },
+        fetchApiPost,
+        produitsTemplate,
+      );
     });
 
     deleteBtnProduit[index].addEventListener('click', async (e) => {
@@ -496,9 +489,6 @@ const tablesTemplate = async () => {
       const article = document.createElement('article');
       article.setAttribute('table-id', table.id_table);
       article.innerHTML = `
-        <div class="input-group">
-          <h4>Table id: ${table.id_table}</h4>
-        </div>
         <div class="input-group">
           <label>Numéro :</label>
           <input type="number" name="numero" value="${table.numero}" />
