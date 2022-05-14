@@ -86,9 +86,13 @@ const displayCommand = async () => {
       <h3>${produitsList[detailsCommand.id_produit].denomination} x${
       detailsCommand.qt_commandee
     }</h3>
-      <p>Soit ${Math.round(
-        Number(detailsCommand.qt_commandee) * Number(produitsList[detailsCommand.id_produit].prix),
-      )} €</p>
+      <p>Soit ${
+        Math.round(
+          Number(detailsCommand.qt_commandee) *
+            Number(produitsList[detailsCommand.id_produit].prix) *
+            100,
+        ) / 100
+      } €</p>
     `;
 
     commandElement.appendChild(element);
