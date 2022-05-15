@@ -102,14 +102,14 @@ INSERT INTO users
 ('Gestionnaire','D534B96C9C231037A98126891EC898EB',0),
 ('Barman','EF749FF9A048BAD0DD80807FC49E1C0D',1);
 
-CREATE TABLE tables
+CREATE TABLE pass
 (
   id             int(11) NOT NULL AUTO_INCREMENT,
   passcode       char(200) NOT NULL,
                  PRIMARY KEY (id)
 ) Engine = InnoDB character set utf8 collate utf8_unicode_ci;
 
-INSERT INTO tables
+INSERT INTO pass
 (id, passcode) VALUES
 ("1", "mnzxhohlhpovmadcdphxkicckwuknyzvybhmzpwlrtxykekrblbkuumrqyevtonlwzxcvaxugftrsaxvhrrulaipnfnolssezinwslztiednualldeqzkyysewwvwqwzylenzfikxtzvlyxmgcggoszkpnanbrlxazedgybicsdtnlqhqhwlfzwdgcwwsglgeywhmkvv");
 
